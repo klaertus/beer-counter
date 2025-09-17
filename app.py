@@ -377,6 +377,7 @@ class DrinkApp:
         def get_user_info(user_id):
             return jsonify(self.get_user_info(user_id))
 
+        # Tant que ya pas de nom de domaine associé à l'app, on laisse les routes accessibles à tous
         #@self.app.route("/", methods=["GET"])
         #@self.app.before_request
         #def restrict_admin_routes():
@@ -384,7 +385,7 @@ class DrinkApp:
             
           #  if request.path in admin_routes:
                 #host = request.headers.get('Host', '')
-                # Vérifier si la requête provient du sous-sous-domaine admin.boissons.example.com
+                
                 #if not host.startswith('carapils'):
                 #return jsonify({'error': 'Acces denied'}), 403
             
