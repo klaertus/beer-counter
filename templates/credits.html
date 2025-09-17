@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crédits | Beer Counter</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #1e1e1e;
+            --container-bg: #2c2c2c;
+            --component-bg: #3a3a3a;
+            --primary-color: #5c6bc0;
+            --primary-hover: #3f51b5;
+            --secondary-color: #9575cd;
+            --text-light: #ffffff;
+            --text-muted: #a0a0a0;
+            --border-radius-lg: 16px;
+            --border-radius-md: 12px;
+            --border-radius-sm: 8px;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            margin: 0;
+            padding: 1.5rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        .container {
+            background-color: var(--container-bg);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            max-width: 800px;
+            margin: 2rem auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+        }
+
+        .section {
+            background-color: var(--component-bg);
+            border-radius: var(--border-radius-md);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section h2 {
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .developer-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .developer-avatar {
+            width: 60px;
+            height: 60px;
+            min-width: 60px;
+            min-height: 60px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .license-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius-sm);
+            font-weight: 600;
+            text-decoration: none;
+            margin: 0.5rem 0;
+        }
+
+        .license-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-back {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: var(--border-radius-md);
+            padding: 0.75rem 1.5rem;
+            color: white;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(92, 107, 192, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .tech-badge {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--border-radius-sm);
+            font-size: 0.9rem;
+            border: 1px solid var(--primary-color);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--component-bg);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive design */
+        @media (max-width: 576px) {
+            .container {
+                padding: 1rem;
+                margin: 1rem auto;
+            }
+            
+            .developer-info {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.5rem;
+            }
+            
+            .developer-avatar {
+                align-self: center;
+            }
+            
+            .tech-stack {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Compteur de bières</h1>
+            <div class="subtitle">Application permettant de comptabiliser votre consommation de bières</div>
+        </div>
+
+        <div class="section">
+            <h2><i class="fas fa-user-tie"></i> Développeur</h2>
+            <div class="developer-info">
+                <div class="developer-avatar">K</div>
+                <div>
+                    <h4 style="margin: 0; color: var(--text-light);">Klaertus - Charles Gombeer</h4>
+                    <p style="margin: 0; color: var(--text-muted);">Développeur & Mainteneur</p>
+                </div>
+            </div>
+            <p>Merci à Thomas Schiltz pour l'idée de ce projet et son support</p>
+        </div>
+
+        <div class="section">
+            <h2><i class="fas fa-lock"></i> Licence</h2>
+            <div class="license-badge">
+                <i class="fas fa-users"></i> Licence Privée - Electrokot
+            </div>
+            <p>Ce projet est sous licence propriétaire et est exclusivement destiné aux membres de l'<strong>Electrokot</strong>.</p>
+        </div>
+
+        <div class="section">
+            <h2><i class="fas fa-code"></i> Technologies utilisées</h2>
+            <p>Cette application utilise les technologies modernes suivantes :</p>
+            <div class="tech-stack">
+                <span class="tech-badge"><i class="fab fa-python"></i> Python</span>
+                <span class="tech-badge"><i class="fas fa-flask"></i> Flask</span>
+                <span class="tech-badge"><i class="fab fa-html5"></i> HTML5</span>
+                <span class="tech-badge"><i class="fab fa-css3-alt"></i> CSS3</span>
+                <span class="tech-badge"><i class="fab fa-js"></i> JavaScript</span>
+                <span class="tech-badge"><i class="fab fa-bootstrap"></i> Bootstrap</span>
+                <span class="tech-badge"><i class="fas fa-database"></i> Pandas</span>
+                <span class="tech-badge"><i class="fab fa-docker"></i> Docker</span>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="javascript:history.back()" class="btn-back">
+                <i class="fas fa-arrow-left"></i>
+                Retour
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>© 2024 Beer Counter - Développé avec <i class="fas fa-heart" style="color: #e74c3c;"></i> par Klaertus</p>
+            <p>All rights reserved - Tous droits réservés</p>
+            <p>Version 1.0 - Dernière mise à jour : <span id="current-date"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // Afficher la date actuelle
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('fr-FR');
+    </script>
+</body>
+</html>

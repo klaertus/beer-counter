@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compteur de bières de l'Electrokot</title>
+    
+    <meta name="description" content="Application de comptage de bières pour l'Electrokot">
+    <meta name="theme-color" content="#2c2c2c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="BeerCounter">
+    
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #1e1e1e;
+            --container-bg: #2c2c2c;
+            --component-bg: #3a3a3a;
+            --primary-color: #5c6bc0;
+            --primary-hover: #3f51b5;
+            --secondary-color: #9575cd;
+            --secondary-hover: #7e57c2;
+            --text-light: #ffffff;
+            --text-muted: #a0a0a0;
+            --border-radius-lg: 16px;
+            --border-radius-md: 12px;
+            --border-radius-sm: 8px;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            margin: 0;
+            padding: 1.5rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        .container {
+            background-color: var(--container-bg);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            max-width: 500px;
+            margin: 4rem auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            font-weight: 800;
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        .back-button {
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            background-color: var(--component-bg);
+            border: none;
+            color: var(--text-light);
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius-sm);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-button:hover {
+            background-color: #4a4a4a;
+            transform: translateY(-2px);
+        }
+
+        .user-info {
+            background-color: var(--component-bg);
+            border-radius: var(--border-radius-md);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .user-info:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-info .row {
+            margin-bottom: 1rem;
+        }
+
+        .user-info .row:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            font-weight: 600;
+        }
+
+        .color-box {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            vertical-align: middle;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .counter {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background-color: var(--component-bg);
+            border-radius: var(--border-radius-md);
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(92, 107, 192, 0.3);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(92, 107, 192, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(92, 107, 192, 0);
+            }
+        }
+
+        .count {
+            font-size: 4.5rem;
+            font-weight: 800;
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .count-text {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+        }
+
+        .btn {
+            border: none;
+            padding: 1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: var(--border-radius-md);
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--secondary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            transform: none;
+            cursor: not-allowed;
+        }
+
+        .btn .icon {
+            font-size: 1.2rem;
+        }
+
+        .modal-content {
+            background-color: var(--container-bg);
+            color: var(--text-light);
+            border-radius: var(--border-radius-md);
+            border: none;
+        }
+
+        .modal-header {
+            border: none;
+            padding: 1.5rem 1.5rem 1rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            border: none;
+            padding: 1rem 1.5rem 1.5rem;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .btn-close {
+            filter: invert(1) brightness(200%);
+        }
+
+        .alert {
+            margin-bottom: 1.5rem;
+            border: none;
+            border-radius: var(--border-radius-md);
+            padding: 1rem;
+            background-color: #553c2a;
+            color: #ffb74d;
+        }
+
+        .progress {
+            height: 4px;
+            background-color: rgba(255, 183, 77, 0.3);
+            margin-top: 0.5rem;
+        }
+
+        .progress-bar {
+            background-color: #ffb74d;
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding: 1.5rem;
+                margin-top: 4rem;
+                margin-bottom: 1rem;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .count {
+                font-size: 3.5rem;
+            }
+
+            .btn {
+                padding: 0.75rem;
+            }
+
+            .back-button span {
+                display: none;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .info-icon {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .info-icon:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(92, 107, 192, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        
+    </style>
+</head>
+
+<body>
+    <a href="/setup" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+        <span>Retour aux paramètres</span>
+    </a>
+
+    <div class="container">
+        <h1>Vos Bières</h1>
+        
+        <div id="cooldownAlert" style="display: none;" class="alert fade-in">
+            <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Tu sembles ne pas boire réellement tes bières !</strong>
+            </div>
+            <div>
+                Fais gaffe, la prochaine fois c'est ban ! Temps avant ta prochaine bière :
+                <span id="cooldownTimer">--:--</span>
+                <div class="progress">
+                    <div id="cooldownProgress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="counter">
+            <div class="count-container">
+                <span id="beerCount" class="count">0</span>
+                <span class="count-text">bières bues</span>
+                <div class="vomit-indicator">
+                    <i class="fas fa-ghost"></i>
+                    <span id="vomitCount">0</span>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="user-info">
+            <div class="row align-items-center">
+                <div class="col-6">
+                    <span class="info-label">Nom:</span>
+                    <span id="displayUsername" class="info-value"></span>
+                </div>
+                <div class="col-6 d-flex align-items-center">
+                    <span class="info-label me-2">Couleur:</span>
+                    <span id="nameColorBox" class="color-box"></span>
+                </div>
+            </div>
+
+            <div class="row align-items-center">
+                <div class="col-6">
+                    <span class="info-label">KAP:</span>
+                    <span id="displayTeam" class="info-value"></span>
+                </div>
+                <div class="col-6 d-flex align-items-center">
+                    <span class="info-label me-2">Couleur:</span>
+                    <span id="teamColorBox" class="color-box"></span>
+                </div>
+            </div>
+        </div>
+
+        <input type="file" class="d-none" id="selfieInput" accept="image/*" capture="environment">
+
+        <button class="btn btn-secondary" id="vomitBtn">
+            <i class="fas fa-ghost icon"></i>
+            <span>+1 Vomit</span>
+            <i class="fas fa-ghost icon"></i>
+        </button>
+        
+        <button class="btn btn-primary" id="beerBtn">
+            <i class="fas fa-beer icon"></i>
+            <span>+1 Bière</span>
+            <i class="fas fa-beer icon"></i>
+        </button>
+    </div>
+
+    <div class="modal fade" id="photoModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header justify-content-center">
+                    <h5 class="modal-title">Prendre un selfie bière à la main ?</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <button type="button" class="btn modal-btn btn-secondary w-100" id="noPhotoBtn" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-2"></i>Non
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button type="button" class="btn modal-btn btn-primary w-100" id="yesPhotoBtn">
+                                <i class="fas fa-camera me-2"></i>Oui
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="confirmationModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header justify-content-center">
+                    <h5 class="modal-title w-100 text-center" id="confirmationMessage">Succès !</h5>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const ENDPOINTS = {
+            USER_INFO: '/api/userinfo/',
+            INCREMENT_BEER: '/api/incrementBeer',
+            INCREMENT_VOMIT: '/api/incrementVomit'
+        };
+
+        const userId = getCookie('user_id');
+        let userData = null;
+        let incrementType = null;
+
+        const photoModal = new bootstrap.Modal(document.getElementById('photoModal'));
+        const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+
+        const beerBtn = document.getElementById('beerBtn');
+        const vomitBtn = document.getElementById('vomitBtn');
+        const selfieInput = document.getElementById('selfieInput');
+        const yesPhotoBtn = document.getElementById('yesPhotoBtn');
+        const noPhotoBtn = document.getElementById('noPhotoBtn');
+        const confirmationMessage = document.getElementById('confirmationMessage');
+        const cooldownAlert = document.getElementById('cooldownAlert');
+        const cooldownTimer = document.getElementById('cooldownTimer');
+        const cooldownProgress = document.getElementById('cooldownProgress');
+
+        function getCookie(name) {
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const ca = decodedCookie.split(';');
+            name = name + "=";
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        }
+
+        function formatTimeRemaining(cooldown, elapsed) {
+            const remaining = Math.max(0, cooldown - elapsed);
+            const minutes = Math.floor(remaining / 60);
+            const seconds = Math.floor(remaining % 60);
+            return `${minutes}min ${seconds.toString().padStart(2, '0')}s`;
+        }
+
+        function saveCooldown(cooldown, elapsed) {
+            const cooldownData = {
+                cooldown,
+                startTime: Date.now() - (elapsed * 1000),
+                userId
+            };
+            localStorage.setItem('beerCooldown', JSON.stringify(cooldownData));
+        }
+
+        function checkExistingCooldown() {
+            const storedCooldown = localStorage.getItem('beerCooldown');
+            if (storedCooldown) {
+                const cooldownData = JSON.parse(storedCooldown);
+                const now = Date.now();
+                const elapsed = (now - cooldownData.startTime) / 1000;
+                
+                if (elapsed < cooldownData.cooldown && cooldownData.userId === userId) {
+                    showCooldownAlert(cooldownData.cooldown, elapsed);
+                    return true;
+                } else {
+                    localStorage.removeItem('beerCooldown');
+                }
+            }
+            return false;
+        }
+
+        function showCooldownAlert(cooldown, elapsed) {
+            cooldownAlert.style.display = 'block';
+            beerBtn.disabled = true;
+            beerBtn.style.opacity = '0.5';
+            
+            updateCooldownProgress(cooldown, elapsed);
+        }
+
+        function updateCooldownProgress(cooldown, currentElapsed) {
+            const updateProgress = () => {
+                const now = Date.now();
+                const storedCooldown = JSON.parse(localStorage.getItem('beerCooldown'));
+                if (!storedCooldown) return;
+
+                const elapsed = (now - storedCooldown.startTime) / 1000;
+                const progress = Math.min((elapsed / cooldown) * 100, 100);
+                const timeLeft = formatTimeRemaining(cooldown, elapsed);
+                
+                cooldownTimer.textContent = timeLeft;
+                cooldownProgress.style.width = `${progress}%`;
+                
+                if (elapsed < cooldown) {
+                    requestAnimationFrame(() => setTimeout(updateProgress, 1000));
+                } else {
+                    localStorage.removeItem('beerCooldown');
+                    beerBtn.disabled = false;
+                    beerBtn.style.opacity = '1';
+                    cooldownAlert.style.display = 'none';
+                }
+            };
+
+            updateProgress();
+        }
+
+        async function fetchUserInfo() {
+            try {
+                const response = await axios.get(`${ENDPOINTS.USER_INFO}${userId}`);
+                userData = response.data[0];
+                updateUI();
+            } catch (error) {
+                console.error('Error fetching user info:', error);
+                alert('Erreur lors de la récupération de vos informations!');
+                window.location.href = '/setup';
+            }
+        }
+
+        async function incrementBeer(formData) {
+            const originalContent = beerBtn.innerHTML;
+            beerBtn.disabled = true;
+            try {
+                beerBtn.innerHTML = `
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span>Chargement...</span>
+                `;
+                
+                // Effectuer la requête
+                const response = await axios.post(ENDPOINTS.INCREMENT_BEER, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+
+                beerBtn.disabled = false;
+                beerBtn.innerHTML = originalContent;
+                
+                // Traitement normal de la réponse
+                selfieInput.value = '';
+                confirmationMessage.textContent = `Bière comptabilisée pour ${response.data.username} du KAP ${response.data.team}`;
+                fetchUserInfo();
+                confirmationModal.show();
+
+            } catch (error) {
+                beerBtn.disabled = false;
+                beerBtn.innerHTML = originalContent;
+                
+                // Gestion des erreurs
+                handleIncrementError(error);
+            }
+        }
+
+        async function incrementVomit(formData) {
+            vomitBtn.disabled = true;
+            const originalContent = vomitBtn.innerHTML;
+            try {
+                vomitBtn.innerHTML = `
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span>Chargement...</span>
+                `;
+                
+                const response = await axios.post(ENDPOINTS.INCREMENT_VOMIT, formData);
+                
+                vomitBtn.disabled = false;
+                vomitBtn.innerHTML = originalContent;
+                
+                confirmationMessage.textContent = `Vomissement comptabilisé pour ${response.data.username} du KAP ${response.data.team}`;
+                fetchUserInfo();
+                confirmationModal.show();
+                
+            } catch (error) {
+                vomitBtn.disabled = false;
+                vomitBtn.innerHTML = originalContent;
+                
+                console.error('Error incrementing vomit:', error);
+                alert(error.response?.data?.error || 'Une erreur est survenue');
+            }
+        }
+
+        function handleIncrementError(error) {
+            if (error.response && error.response.status === 429) {
+                const { cooldown, elapsed } = error.response.data;
+                saveCooldown(cooldown, elapsed);
+                showCooldownAlert(cooldown, elapsed);
+            } else {
+                alert(error.response?.data?.error || 'Une erreur est survenue');
+            }
+        }
+
+        function updateUI() {
+            if (!userData) return;
+            
+            document.getElementById('beerCount').textContent = userData.drink_count;
+            document.getElementById('vomitCount').textContent = userData.vomit_count;
+            document.getElementById('displayUsername').textContent = userData.username;
+            document.getElementById('displayTeam').textContent = userData.team;
+            document.getElementById('nameColorBox').style.backgroundColor = userData.color;
+            document.getElementById('teamColorBox').style.backgroundColor = userData.team_color;
+
+            const counter = document.querySelector('.counter');
+            counter.classList.remove('fade-in');
+            void counter.offsetWidth;
+            counter.classList.add('fade-in');
+        }
+
+        function initEventListeners() {
+            beerBtn.addEventListener('click', () => {
+                incrementType = 'beer';
+                photoModal.show();
+            });
+
+            vomitBtn.addEventListener('click', () => {
+                incrementType = 'vomit';
+                const formData = new FormData();
+                formData.append('user_id', userId);
+                incrementVomit(formData);
+            });
+
+            yesPhotoBtn.addEventListener('click', () => {
+                selfieInput.click();
+                photoModal.hide();
+            });
+
+            noPhotoBtn.addEventListener('click', () => {
+                if (incrementType === 'beer') {
+                    const formData = new FormData();
+                    formData.append('user_id', userId);
+                    incrementBeer(formData);
+                }
+            });
+
+            selfieInput.addEventListener('change', function() {
+                const selfie = this.files[0];
+                if (selfie && incrementType === 'beer') {
+                    const formData = new FormData();
+                    formData.append('user_id', userId);
+                    formData.append('selfie', selfie);
+                    incrementBeer(formData);
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!userId) {
+                alert("Configurez d'abord votre nom et votre KAP!");
+                window.location.href = '/setup';
+                return;
+            }
+            
+            fetchUserInfo();
+            initEventListeners();
+            checkExistingCooldown();
+        });
+    </script>
+    
+    <a href="/credits" class="info-icon" title="Crédits et informations">
+        <i class="fas fa-info"></i>
+    </a>
+
+    <script src="/static/pwa.js"></script>
+</body>
+</html>

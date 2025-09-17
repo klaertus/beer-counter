@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration | Beer Counter</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #1e1e1e;
+            --container-bg: #2c2c2c;
+            --input-bg: #3a3a3a;
+            --primary-color: #5c6bc0;
+            --primary-hover: #3f51b5;
+            --secondary-color: #9575cd;
+            --text-light: #ffffff;
+            --text-muted: #a0a0a0;
+            --border-radius-lg: 16px;
+            --border-radius-md: 12px;
+            --border-radius-sm: 8px;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 1.5rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        .container {
+            background-color: var(--container-bg);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            max-width: 500px;
+            margin: 4rem auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            font-weight: 800;
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-control {
+            background-color: var(--input-bg);
+            color: var(--text-light);
+            border: none;
+            border-radius: var(--border-radius-md);
+            padding: 0.75rem;
+            font-size: 1rem;
+            width: 100%;
+            padding-right: 40px;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        .color-button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+
+        .team-select {
+            display: flex;
+            align-items: center;
+            background-color: var(--input-bg);
+            color: var(--text-light);
+            border: none;
+            border-radius: var(--border-radius-md);
+            padding: 0.75rem;
+            font-size: 1rem;
+            width: 100%;
+            cursor: pointer;
+            text-align: left;
+            position: relative;
+        }
+
+        .team-select-text {
+            flex-grow: 1;
+        }
+
+        .btn {
+            border: none;
+            padding: 1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: var(--border-radius-md);
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--input-bg);
+        }
+
+        .btn-secondary:hover {
+            background-color: #4a4a4a;
+        }
+
+        /* Styles pour le modal */
+        .modal-content {
+            background-color: var(--container-bg);
+            color: var(--text-light);
+            border-radius: var(--border-radius-md);
+            border: none;
+        }
+
+        .modal-header {
+            border: none;
+            padding: 1.5rem 1.5rem 1rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            border: none;
+            padding: 1rem 1.5rem 1.5rem;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .btn-close {
+            filter: invert(1) brightness(200%);
+        }
+
+        /* Styles pour le sélecteur de couleur */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .color-option {
+            aspect-ratio: 1;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.selected {
+            border-color: white;
+        }
+
+        .color-preview {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 1.5rem;
+        }
+
+        .current-color {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--border-radius-sm);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .color-sliders {
+            background-color: var(--input-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius-md);
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .slider-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .slider-group label {
+            width: 20px;
+            font-weight: bold;
+        }
+
+        .slider-group .form-range {
+            flex: 1;
+        }
+
+        .form-range::-webkit-slider-thumb {
+            background-color: var(--primary-color);
+        }
+
+        .form-range::-moz-range-thumb {
+            background-color: var(--primary-color);
+        }
+
+        .slider-value {
+            width: 40px;
+            text-align: right;
+            font-family: monospace;
+        }
+
+        /* Styles pour la liste des équipes */
+        .team-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 1.5rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) var(--input-bg);
+        }
+
+        .team-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .team-list::-webkit-scrollbar-track {
+            background: var(--input-bg);
+            border-radius: 4px;
+        }
+
+        .team-list::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .team-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background-color: var(--input-bg);
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-bottom: 8px;
+        }
+
+        .team-option:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .team-option.selected {
+            background-color: var(--primary-hover);
+        }
+
+        .team-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .team-name {
+            flex-grow: 1;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .form-feedback {
+            color: #ff6b6b;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 576px) {
+            .container {
+                padding: 1.5rem;
+                margin: 1rem auto;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .btn {
+                padding: 0.75rem;
+            }
+        }
+
+        /* Icône d'information */
+        .info-icon {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .info-icon:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(92, 107, 192, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Paramètres</h1>
+        
+        <div class="setup-form">
+            <div class="form-group">
+                <label for="username" class="form-label">Votre prénom</label>
+                <div class="input-wrapper">
+                    <input type="text" class="form-control" id="username" placeholder="Entrez votre prénom" autocomplete="off">
+                    <div id="nameColorButton" class="color-button"></div>
+                    <div class="form-feedback" id="usernameFeedback"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="teamSelect" class="form-label">Votre KAP</label>
+                <div class="input-wrapper">
+                    <button type="button" class="team-select" id="teamSelect">
+                        <span class="team-select-text">Sélectionnez votre KAP</span>
+                        <div id="teamColorPreview" class="color-button" style="display: none;"></div>
+                    </button>
+                    <div class="form-feedback" id="teamFeedback"></div>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-primary mt-4" id="confirmBtn">
+                <i class="fas fa-check me-2"></i>Confirmer
+            </button>
+        </div>
+    </div>
+
+    <div class="modal fade" id="colorPickerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Choisissez votre couleur</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 class="mb-3">Couleurs suggérées</h6>
+                    <div class="color-grid" id="suggestedColors"></div>
+                    
+                    <div class="color-preview">
+                        <div class="current-color" id="currentColorPreview"></div>
+                        <div id="colorHexValue">#000000</div>
+                    </div>
+                    
+                    <div class="color-sliders">
+                        <div class="slider-group">
+                            <label>R</label>
+                            <input type="range" min="0" max="255" value="0" class="form-range" id="redSlider">
+                            <span class="slider-value" id="redValue">0</span>
+                        </div>
+                        <div class="slider-group">
+                            <label>G</label>
+                            <input type="range" min="0" max="255" value="0" class="form-range" id="greenSlider">
+                            <span class="slider-value" id="greenValue">0</span>
+                        </div>
+                        <div class="slider-group">
+                            <label>B</label>
+                            <input type="range" min="0" max="255" value="0" class="form-range" id="blueSlider">
+                            <span class="slider-value" id="blueValue">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="confirmColorBtn">
+                        <i class="fas fa-check me-2"></i>Confirmer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="teamSelectModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Choisissez votre KAP</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="team-list" id="teamList">
+                    </div>
+                    
+                    <button type="button" class="btn btn-secondary" id="addNewTeamBtn">
+                        <i class="fas fa-plus me-2"></i>Ajouter un nouveau KAP
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="newTeamModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nouveau KAP</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group mb-4">
+                        <label for="newTeamName" class="form-label">Nom du KAP</label>
+                        <div class="input-wrapper">
+                            <input type="text" class="form-control" id="newTeamName" placeholder="Entrez le nom du KAP" autocomplete="off">
+                            <div id="newTeamColorButton" class="color-button"></div>
+                            <div class="form-feedback" id="newTeamFeedback"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="confirmNewTeamBtn">
+                        <i class="fas fa-check me-2"></i>Ajouter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        let currentColorTarget = null;
+        let selectedTeamData = null;
+        let currentColor = '#000000';
+        let availableTeams = {};
+
+        const suggestedColors = [
+            '#FF5252', '#FF4081', '#E040FB', '#7C4DFF', '#536DFE', '#448AFF', '#40C4FF', 
+            '#18FFFF', '#64FFDA', '#69F0AE', '#B2FF59', '#EEFF41', '#FFFF00', '#FFD740', 
+            '#FFAB40', '#FF6E40', '#8D6E63', '#78909C', '#F50057', '#D500F9', '#651FFF', 
+            '#3D5AFE', '#2979FF', '#00B0FF', '#00E5FF', '#1DE9B6', '#00E676', '#76FF03', 
+            '#C6FF00', '#FFEA00', '#FFC400', '#FF9100', '#FF3D00'
+        ];
+
+        const colorPickerModal = new bootstrap.Modal(document.getElementById('colorPickerModal'));
+        const teamSelectModal = new bootstrap.Modal(document.getElementById('teamSelectModal'));
+        const newTeamModal = new bootstrap.Modal(document.getElementById('newTeamModal'));
+
+        const nameColorButton = document.getElementById('nameColorButton');
+        const teamSelect = document.getElementById('teamSelect');
+        const teamColorPreview = document.getElementById('teamColorPreview');
+        const newTeamColorButton = document.getElementById('newTeamColorButton');
+        const confirmBtn = document.getElementById('confirmBtn');
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            initializeColorButtons();
+            await loadTeamListAsync();
+            loadSavedUserData();
+            setupEventListeners();
+            renderColorOptions();
+        });
+
+        function getRandomColor() {
+            return suggestedColors[Math.floor(Math.random() * suggestedColors.length)];
+        }
+
+        function hexToRgb(hex) {
+            hex = hex.replace(/^#/, '');
+            return {
+                r: parseInt(hex.substring(0, 2), 16),
+                g: parseInt(hex.substring(2, 4), 16),
+                b: parseInt(hex.substring(4, 6), 16)
+            };
+        }
+
+        function rgbToHex(r, g, b) {
+            return '#' + [r, g, b].map(x => {
+                const hex = x.toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            }).join('').toUpperCase();
+        }
+
+        function setCookie(name, value, hours) {
+            const date = new Date();
+            date.setTime(date.getTime() + (hours * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return "";
+        }
+
+        function showFeedback(elementId, message, isError = true) {
+            const feedback = document.getElementById(elementId);
+            feedback.textContent = message;
+            feedback.style.color = isError ? '#ff6b6b' : '#69F0AE';
+            
+            setTimeout(() => {
+                feedback.textContent = '';
+            }, 3000);
+        }
+
+        function initializeColorButtons() {
+            const initialNameColor = getRandomColor();
+            const initialTeamColor = getRandomColor(); 
+            
+            nameColorButton.style.backgroundColor = initialNameColor;
+            nameColorButton.dataset.color = initialNameColor;
+            
+            newTeamColorButton.style.backgroundColor = initialTeamColor;
+            newTeamColorButton.dataset.color = initialTeamColor;
+        }
+        
+        function renderColorOptions() {
+            const container = document.getElementById('suggestedColors');
+            container.innerHTML = '';
+            
+            suggestedColors.forEach(color => {
+                const colorOption = document.createElement('div');
+                colorOption.className = 'color-option';
+                colorOption.style.backgroundColor = color;
+                colorOption.dataset.color = color;
+                
+                colorOption.addEventListener('click', () => {
+                    selectColor(color);
+                    document.querySelectorAll('.color-option').forEach(option => {
+                        option.classList.remove('selected');
+                    });
+                    colorOption.classList.add('selected');
+                });
+                
+                container.appendChild(colorOption);
+            });
+        }
+
+        function selectColor(color) {
+            currentColor = color;
+            const rgb = hexToRgb(color);
+            
+            document.getElementById('currentColorPreview').style.backgroundColor = color;
+            document.getElementById('colorHexValue').textContent = color.toUpperCase();
+            document.getElementById('redSlider').value = rgb.r;
+            document.getElementById('greenSlider').value = rgb.g;
+            document.getElementById('blueSlider').value = rgb.b;
+            
+            updateSliderValues();
+        }
+
+        function updateSliderValues() {
+            document.getElementById('redValue').textContent = document.getElementById('redSlider').value;
+            document.getElementById('greenValue').textContent = document.getElementById('greenSlider').value;
+            document.getElementById('blueValue').textContent = document.getElementById('blueSlider').value;
+        }
+
+        function loadTeamList() {
+            axios.get('/api/teamlist')
+                .then(response => {
+                    const teams = response.data;
+                    availableTeams = teams; 
+                    const teamList = document.getElementById('teamList');
+                    teamList.innerHTML = '';
+                    
+                    Object.keys(teams).forEach(teamName => {
+                        const teamColor = teams[teamName];
+                        const teamOption = createTeamOption(teamName, teamColor);
+                        teamList.appendChild(teamOption);
+                    });
+                })
+                .catch(error => {
+                    console.error('Erreur lors du chargement des KAPs:', error);
+                    showFeedback('teamFeedback', 'Impossible de charger la liste des KAPs');
+                });
+        }
+
+        async function loadTeamListAsync() {
+            try {
+                const response = await axios.get('/api/teamlist');
+                const teams = response.data;
+                availableTeams = teams; 
+                const teamList = document.getElementById('teamList');
+                teamList.innerHTML = '';
+                
+                Object.keys(teams).forEach(teamName => {
+                    const teamColor = teams[teamName];
+                    const teamOption = createTeamOption(teamName, teamColor);
+                    teamList.appendChild(teamOption);
+                });
+            } catch (error) {
+                console.error('Erreur lors du chargement des KAPs:', error);
+                showFeedback('teamFeedback', 'Impossible de charger la liste des KAPs');
+            }
+        }
+
+        function createTeamOption(teamName, teamColor) {
+            const teamOption = document.createElement('div');
+            teamOption.className = 'team-option';
+            teamOption.dataset.team = teamName;
+            teamOption.dataset.color = teamColor;
+            
+            teamOption.innerHTML = `
+                <div class="team-color" style="background-color: ${teamColor}"></div>
+                <div class="team-name">${teamName}</div>
+            `;
+            
+            teamOption.addEventListener('click', () => {
+                selectTeam(teamOption);
+            });
+            
+            return teamOption;
+        }
+
+        function selectTeam(teamOption) {
+            document.querySelectorAll('.team-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            teamOption.classList.add('selected');
+            
+            const teamName = teamOption.dataset.team;
+            const teamColor = teamOption.dataset.color;
+            
+            selectedTeamData = {
+                name: teamName,
+                color: teamColor
+            };
+            
+            teamSelect.querySelector('.team-select-text').textContent = teamName;
+            teamColorPreview.style.backgroundColor = teamColor;
+            teamColorPreview.style.display = 'block';
+            
+            teamSelectModal.hide();
+        }
+
+        function loadSavedUserData() {
+            const savedUsername = getCookie('username');
+            const savedNameColor = getCookie('nameColor');
+            const savedTeam = getCookie('team');
+            const savedTeamColor = getCookie('teamColor');
+            
+            if (savedUsername) {
+                document.getElementById('username').value = savedUsername;
+            }
+            
+            if (savedNameColor) {
+                nameColorButton.style.backgroundColor = savedNameColor;
+                nameColorButton.dataset.color = savedNameColor;
+            }
+            
+            if (savedTeam && availableTeams[savedTeam]) {
+                teamSelect.querySelector('.team-select-text').textContent = savedTeam;
+                
+                if (savedTeamColor) {
+                    teamColorPreview.style.backgroundColor = savedTeamColor;
+                    teamColorPreview.style.display = 'block';
+                    
+                    selectedTeamData = {
+                        name: savedTeam,
+                        color: savedTeamColor
+                    };
+                }
+            } else if (savedTeam) {
+                setCookie('team', '', -1);
+                setCookie('teamColor', '', -1);
+                console.log(`KAP "${savedTeam}" n'existe plus dans la liste, cookies nettoyés.`);
+            }
+        }
+
+        function setupEventListeners() {
+            nameColorButton.addEventListener('click', () => {
+                currentColorTarget = nameColorButton;
+                openColorPicker(nameColorButton.dataset.color || '#000000');
+            });
+            
+            newTeamColorButton.addEventListener('click', () => {
+                currentColorTarget = newTeamColorButton;
+                sessionStorage.setItem('fromModal', 'newTeam');
+                newTeamModal.hide();
+                setTimeout(() => {
+                    openColorPicker(newTeamColorButton.dataset.color || '#000000');
+                }, 300);
+            });
+
+            document.getElementById('confirmColorBtn').addEventListener('click', () => {
+                if (currentColorTarget) {
+                    currentColorTarget.style.backgroundColor = currentColor;
+                    currentColorTarget.dataset.color = currentColor;
+                    colorPickerModal.hide();
+                    
+                    if (sessionStorage.getItem('fromModal') === 'newTeam') {
+                        setTimeout(() => {
+                            newTeamModal.show();
+                            sessionStorage.removeItem('fromModal');
+                        }, 300);
+                    }
+                }
+            });
+            
+            document.getElementById('redSlider').addEventListener('input', updateColorFromSliders);
+            document.getElementById('greenSlider').addEventListener('input', updateColorFromSliders);
+            document.getElementById('blueSlider').addEventListener('input', updateColorFromSliders);
+            
+            teamSelect.addEventListener('click', () => {
+                teamSelectModal.show();
+            });
+            
+            document.getElementById('addNewTeamBtn').addEventListener('click', () => {
+                teamSelectModal.hide();
+                setTimeout(() => newTeamModal.show(), 500);
+            });
+            
+            document.getElementById('confirmColorBtn').addEventListener('click', () => {
+                if (currentColorTarget) {
+                    currentColorTarget.style.backgroundColor = currentColor;
+                    currentColorTarget.dataset.color = currentColor;
+                    colorPickerModal.hide();
+                }
+            });
+            
+            document.getElementById('confirmNewTeamBtn').addEventListener('click', addNewTeam);
+            
+            confirmBtn.addEventListener('click', saveUserSettings);
+        }
+
+        function openColorPicker(color) {
+            selectColor(color);
+            colorPickerModal.show();
+            
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.classList.toggle('selected', option.dataset.color === color);
+            });
+        }
+
+        function updateColorFromSliders() {
+            const r = parseInt(document.getElementById('redSlider').value);
+            const g = parseInt(document.getElementById('greenSlider').value);
+            const b = parseInt(document.getElementById('blueSlider').value);
+            
+            currentColor = rgbToHex(r, g, b);
+            document.getElementById('currentColorPreview').style.backgroundColor = currentColor;
+            document.getElementById('colorHexValue').textContent = currentColor;
+            
+            updateSliderValues();
+        }
+
+        function addNewTeam() {
+            const teamName = document.getElementById('newTeamName').value.trim();
+            const teamColor = newTeamColorButton.dataset.color;
+            
+            if (!teamName) {
+                showFeedback('newTeamFeedback', 'Veuillez entrer un nom pour le KAP');
+                return;
+            }
+            
+            selectedTeamData = {
+                name: teamName,
+                color: teamColor,
+                isNew: true
+            };
+            
+            teamSelect.querySelector('.team-select-text').textContent = teamName;
+            teamColorPreview.style.backgroundColor = teamColor;
+            teamColorPreview.style.display = 'block';
+            
+            newTeamModal.hide();
+        }
+
+        function saveUserSettings() {
+            const username = document.getElementById('username').value.trim();
+            
+            if (!username) {
+                showFeedback('usernameFeedback', 'Veuillez entrer votre prénom');
+                document.getElementById('username').focus();
+                return;
+            }
+            
+            if (!selectedTeamData) {
+                showFeedback('teamFeedback', 'Veuillez sélectionner ou créer un KAP');
+                return;
+            }
+            
+            const nameColor = nameColorButton.dataset.color;
+            const team = selectedTeamData.name;
+            const teamColor = selectedTeamData.color;
+            
+            setCookie('username', username, 24);
+            setCookie('nameColor', nameColor, 24);
+            setCookie('team', team, 24);
+            setCookie('teamColor', teamColor, 24);
+            
+            const userData = {
+                username: username,
+                team: team,
+                nameColor: nameColor,
+                teamColor: selectedTeamData.isNew ? teamColor : false
+            };
+            
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Chargement...';
+            
+            axios.post('/api/set', userData)
+                .then(response => {
+                    const userId = response.data.user_id;
+                    
+                    if (response.data.code == 201) {
+                        const confirmation = confirm('Cette personne existe déjà dans ce KAP ! Êtes-vous bien cette personne ?');
+                        
+                        if (confirmation) {
+                            setCookie('user_id', userId, 24);
+                            window.location.href = '/';
+                        } else {
+                            confirmBtn.disabled = false;
+                            confirmBtn.innerHTML = '<i class="fas fa-check me-2"></i>Confirmer';
+                        }
+                    } else {
+                        setCookie('user_id', userId, 24);
+                        window.location.href = '/';
+                    }
+                })
+                .catch(error => {
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = '<i class="fas fa-check me-2"></i>Confirmer';
+                    
+                    if (error.response && error.response.data.error) {
+                        showFeedback('usernameFeedback', error.response.data.error);
+                    } else {
+                        showFeedback('usernameFeedback', 'Une erreur est survenue lors de l\'enregistrement');
+                    }
+                });
+        }
+    </script>
+
+    <a href="/credits" class="info-icon" title="Crédits et informations">
+        <i class="fas fa-info"></i>
+    </a>
+</body>
+</html>

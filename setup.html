@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #2c2c2c;
+            color: white;
+            height: 90vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #3a3a3a;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 45px;
+            margin-bottom: 24px;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background-color: #5c6bc0;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #3f51b5;
+        }
+
+        .form-control,
+        .form-select {
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+        }
+
+        .form-control::placeholder {
+            color: #b0b0b0;
+        }
+
+        .color-picker-button {
+            width: 40px;
+            height: 40px;
+            border: none;
+            cursor: pointer;
+            margin-left: 10px;
+            border-radius: 5px;
+            background-color: #000000;
+        }
+
+        .color-picker-input {
+            display: none;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .input-group .form-control {
+            flex: 1;
+        }
+
+        .color-wrapper {
+            display: flex;
+            align-items: center;
+            margin-left: 10px;
+        }
+
+        .color-wrapper label {
+            margin-left: 10px;
+            font-size: 14px;
+        }
+
+        #username {
+            border-radius: 5px;
+        }
+
+        #teamColorWrapper {
+            display: none;
+            border-radius: 5px;
+        }
+
+        #teamColorButton {
+            border-radius: 5px;
+        }
+
+        /* Styles pour le sélecteur de couleur personnalisé */
+        .suggested-colors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.selected {
+            border-color: white;
+        }
+
+        .custom-color-picker {
+            background-color: #2c2c2c;
+            padding: 20px;
+            border-radius: 16px;
+        }
+
+        .color-preview {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .current-color {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            border: 2px solid #4a4a4a;
+        }
+
+        #colorHexValue {
+            font-family: monospace;
+            font-size: 1.2em;
+        }
+
+        .color-sliders {
+            margin-top: 20px;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .slider-group label {
+            width: 20px;
+        }
+
+        .slider-group .form-range {
+            flex: 1;
+        }
+
+        .slider-value {
+            width: 40px;
+            text-align: right;
+            font-family: monospace;
+        }
+
+        .form-range {
+            height: 6px;
+            background-color: #4a4a4a;
+        }
+
+        .form-range::-webkit-slider-thumb {
+            background-color: #5c6bc0;
+        }
+
+        .form-range::-moz-range-thumb {
+            background-color: #5c6bc0;
+        }
+
+        /* Styles pour la liste des KAP */
+        .team-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .team-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            background-color: #4a4a4a;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .team-option:hover {
+            background-color: #5c6bc0;
+        }
+
+        .team-option.selected {
+            background-color: #3f51b5;
+        }
+
+        .team-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .team-name {
+            flex-grow: 1;
+            text-align: left;
+        }
+
+        .team-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .team-list::-webkit-scrollbar-track {
+            background: #3a3a3a;
+            border-radius: 4px;
+        }
+
+        .team-list::-webkit-scrollbar-thumb {
+            background: #5c6bc0;
+            border-radius: 4px;
+        }
+
+        .team-list::-webkit-scrollbar-thumb:hover {
+            background: #3f51b5;
+        }
+
+        #teamSelectBtn {
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        #teamSelectBtn:hover {
+            background-color: #5a5a5a;
+        }
+
+        #addNewTeamBtn {
+            border-color: #5c6bc0;
+            color: white;
+        }
+
+        #addNewTeamBtn:hover {
+            background-color: #5c6bc0;
+        }
+
+        .modal-content {
+            background-color: #3a3a3a;
+            color: white;
+        }
+
+        .modal-header,
+        .modal-footer {
+            border: none;
+        }
+
+        .btn-close {
+            filter: invert(1) brightness(200%);
+        }
+
+        #teamSelectBtn {
+        padding: 8px 12px;
+            }
+
+        .team-preview-color {
+                width: 24px;
+                height: 24px;
+                border-radius: 4px;
+                display: none;
+                transform: translateY(-50%);
+                position: absolute;
+                right: 8px;
+                top: 50%;
+            }
+
+    .team-text {
+            flex-grow: 1;
+        }
+    .name-input-wrapper {
+        position: relative;
+        display: flex;
+        flex-grow: 1;
+    }
+
+    .name-input-wrapper input {
+        padding-right: 40px; /* Espace pour le carré de couleur */
+    }
+
+    .color-picker-button.inside-input {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 24px;
+        height: 24px;
+        margin: 0;
+    }
+
+
+    .team-list {
+        max-height: 400px;
+        overflow-y: auto;
+        margin-bottom: 1rem;
+    }
+
+    .team-option {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background-color: #4a4a4a;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        margin-bottom: 1px;
+    }
+
+    .team-option:hover {
+        background-color: #5c6bc0;
+    }
+
+    .team-option.selected {
+        background-color: #3f51b5;
+    }
+
+    #newTeamForm {
+        animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    #colorPickerModal {
+    z-index: 1060 !important; /* Doit être plus grand que les autres modals */
+        }
+
+        /* Pour s'assurer que le backdrop du color picker soit aussi au-dessus */
+        .modal-backdrop.show:nth-child(2) {
+            z-index: 1055 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Paramètres</h1>
+
+        <!-- Username Input with color picker -->
+        <div class="input-group">
+            <div class="name-input-wrapper">
+                <input type="text" class="form-control" id="username" placeholder="Entrez votre prénom">
+                <button type="button" id="nameColorButton" class="color-picker-button inside-input"></button>
+                <input type="color" class="color-picker-input" id="nameColorPicker" value="#000000">
+            </div>
+        </div>
+
+        <!-- Team Select Button -->
+        <div class="input-group">
+            <div class="name-input-wrapper">
+                <button type="button" class="form-control" id="teamSelectBtn">Sélectionnez votre KAP</button>
+                <div id="teamPreviewColor" class="color-picker-button inside-input"></div>
+                <input type="hidden" id="teamInput">
+                <input type="hidden" id="teamColorPicker" value="#000000">
+            </div>
+        </div>
+
+        <!-- Confirm Button -->
+        <div class="mb-3 mt-4">
+            <button class="btn btn-primary w-100" id="confirmBtn">Confirmer</button>
+        </div>
+    </div>
+
+    <!-- Color Picker Modal -->
+    <div class="modal fade" id="colorPickerModal" tabindex="-1" aria-labelledby="colorPickerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="colorPickerModalLabel">Choisissez une couleur</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Palette de couleurs prédéfinies -->
+                    <div class="mb-4">
+                        <h6 class="mb-3">Couleurs suggérées</h6>
+                        <div class="suggested-colors d-flex flex-wrap gap-2">
+                            <!-- Les couleurs seront ajoutées dynamiquement -->
+                        </div>
+                    </div>
+
+                    <!-- Sélecteur personnalisé -->
+                    <div>
+                        <h6 class="mb-3">Couleur personnalisée</h6>
+                        <div class="custom-color-picker">
+                            <div class="color-preview mb-3">
+                                <div class="current-color"></div>
+                                <div id="colorHexValue">#000000</div>
+                            </div>
+                            <div class="color-sliders">
+                                <div class="slider-group">
+                                    <label>R</label>
+                                    <input type="range" min="0" max="255" value="0" class="form-range" id="redSlider">
+                                    <span class="slider-value">0</span>
+                                </div>
+                                <div class="slider-group">
+                                    <label>G</label>
+                                    <input type="range" min="0" max="255" value="0" class="form-range" id="greenSlider">
+                                    <span class="slider-value">0</span>
+                                </div>
+                                <div class="slider-group">
+                                    <label>B</label>
+                                    <input type="range" min="0" max="255" value="0" class="form-range" id="blueSlider">
+                                    <span class="slider-value">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="confirmColor">Confirmer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Select Modal -->
+    <div class="modal fade" id="teamSelectModal" tabindex="-1" aria-labelledby="teamSelectModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="teamSelectModalLabel">Choisissez votre KAP</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="team-list mb-3">
+                        <!-- Les KAP seront ajoutés ici dynamiquement -->
+                    </div>
+                    <hr class="border-secondary my-3">
+                    <button class="btn btn-outline-light w-100" id="addNewTeamBtn">
+                        + Ajouter un nouveau KAP
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New KAP Modal -->
+    <div class="modal fade" id="newKapModal" tabindex="-1" aria-labelledby="newKapModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newKapModalLabel">Ajouter un nouveau KAP</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <div class="name-input-wrapper">
+                            <input type="text" class="form-control" id="newTeamInput" placeholder="Nom du KAP">
+                            <button type="button" id="newTeamColorButton" class="color-picker-button inside-input"></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="confirmNewKapBtn">Confirmer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    // Éléments DOM principaux
+    const teamInputGroup = document.getElementById('teamInputGroup');
+    const teamInput = document.getElementById('teamInput');
+    const nameColorButton = document.getElementById('nameColorButton');
+    const nameColorPicker = document.getElementById('nameColorPicker');
+    const teamSelectBtn = document.getElementById('teamSelectBtn');
+    const newTeamColorButton = document.getElementById('newTeamColorButton');
+    let selectedTeamOption = null;
+
+    // Initialisation des modals
+    const colorPickerModal = new bootstrap.Modal(document.getElementById('colorPickerModal'));
+    const teamSelectModal = new bootstrap.Modal(document.getElementById('teamSelectModal'));
+    const newKapModal = new bootstrap.Modal(document.getElementById('newKapModal'));
+
+    // Variables pour le color picker
+    let currentButton = null;
+    let currentColor = '#000000';
+
+    // Liste des couleurs suggérées
+    const suggestedColors = ['#FF0000',
+ '#FF4600',
+ '#FF8D00',
+ '#FFD400',
+ '#E2FF00',
+ '#9BFF00',
+ '#54FF00',
+ '#07FF00',
+ '#00FF3E',
+ '#00FF85',
+ '#00FFCC',
+ '#00EAFF',
+ '#00A3FF',
+ '#005CFF',
+ '#000FFF',
+ '#3600FF',
+ '#7D00FF',
+ '#C400FF',
+ '#FF00EC',
+ '#FF00A5',
+ '#FF005E']
+
+
+    // Création des éléments de couleurs suggérées
+    const suggestedColorsContainer = document.querySelector('.suggested-colors');
+    suggestedColors.forEach(color => {
+        const colorDiv = document.createElement('div');
+        colorDiv.className = 'color-option';
+        colorDiv.style.backgroundColor = color;
+        colorDiv.addEventListener('click', () => selectColor(color));
+        suggestedColorsContainer.appendChild(colorDiv);
+    });
+
+    // Fonctions utilitaires
+    function getRandomColor() {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    function getCookie(name) {
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const ca = decodedCookie.split(';');
+        name = name + "=";
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+
+    function setCookie(name, value, hours) {
+        const date = new Date();
+        date.setTime(date.getTime() + (hours * 60 * 60 * 1000));
+        const expires = "expires=" + date.toUTCString();
+        document.cookie = name + "=" + value + ";" + expires + ";path=/";
+    }
+
+    // Fonctions de gestion des couleurs
+    function hexToRgb(hex) {
+        hex = hex.replace(/^#/, '');
+        if (hex.length === 3) {
+            hex = hex.split('').map(char => char + char).join('');
+        }
+        const result = /^([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : {r: 0, g: 0, b: 0};
+    }
+
+    function rgbToHex(r, g, b) {
+        return '#' + [r, g, b].map(x => {
+            const hex = x.toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+        }).join('');
+    }
+
+    function updateColorDisplay(color) {
+        let rgb;
+        if (color.startsWith('rgb')) {
+            const matches = color.match(/\d+/g);
+            rgb = {
+                r: parseInt(matches[0]),
+                g: parseInt(matches[1]),
+                b: parseInt(matches[2])
+            };
+            color = rgbToHex(rgb.r, rgb.g, rgb.b);
+        } else {
+            rgb = hexToRgb(color);
+        }
+        
+        document.querySelector('.current-color').style.backgroundColor = color;
+        document.getElementById('colorHexValue').textContent = color.toUpperCase();
+        document.getElementById('redSlider').value = rgb.r;
+        document.getElementById('greenSlider').value = rgb.g;
+        document.getElementById('blueSlider').value = rgb.b;
+        updateSliderValues();
+    }
+
+    function selectColor(color) {
+        currentColor = color;
+        updateColorDisplay(color);
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.classList.toggle('selected', option.style.backgroundColor === color);
+        });
+    }
+
+    function updateSliderValues() {
+        document.querySelectorAll('.slider-group').forEach(group => {
+            const slider = group.querySelector('.form-range');
+            const value = group.querySelector('.slider-value');
+            value.textContent = slider.value;
+        });
+    }
+
+    // Event Listeners
+    nameColorButton.addEventListener('click', function(e) {
+        currentButton = nameColorButton;
+        currentColor = nameColorButton.style.backgroundColor;
+        updateColorDisplay(currentColor);
+        colorPickerModal.show();
+    });
+
+    newTeamColorButton.addEventListener('click', () => {
+        currentColorTarget = newTeamColorButton;
+        // Mémoriser que nous venons du modal de création de KAP
+        sessionStorage.setItem('fromModal', 'newTeam');
+        // Fermer le modal de création de KAP
+        newTeamModal.hide();
+        // Attendre que le modal se ferme avant d'ouvrir le colorpicker
+        setTimeout(() => {
+            openColorPicker(newTeamColorButton.dataset.color || '#000000');
+        }, 300);
+    });
+
+    // Puis modifiez le gestionnaire de confirmation de couleur
+    document.getElementById('confirmColorBtn').addEventListener('click', () => {
+        if (currentColorTarget) {
+            currentColorTarget.style.backgroundColor = currentColor;
+            currentColorTarget.dataset.color = currentColor;
+            colorPickerModal.hide();
+            
+            // Vérifier d'où nous venons et y retourner
+            if (sessionStorage.getItem('fromModal') === 'newTeam') {
+                setTimeout(() => {
+                    newTeamModal.show();
+                    sessionStorage.removeItem('fromModal');
+                }, 300);
+            }
+        }
+    });
+
+    teamSelectBtn.addEventListener('click', () => {
+        teamSelectModal.show();
+    });
+
+    document.getElementById('addNewTeamBtn').addEventListener('click', () => {
+        teamSelectModal.hide();
+        const randomColor = getRandomColor();
+        newTeamColorButton.style.backgroundColor = randomColor;
+        document.getElementById('newTeamInput').value = '';
+        newKapModal.show();
+    });
+
+    // Event Listeners pour les sliders RGB
+    ['redSlider', 'greenSlider', 'blueSlider'].forEach(id => {
+        const slider = document.getElementById(id);
+        slider.addEventListener('input', () => {
+            const r = parseInt(document.getElementById('redSlider').value);
+            const g = parseInt(document.getElementById('greenSlider').value);
+            const b = parseInt(document.getElementById('blueSlider').value);
+            currentColor = rgbToHex(r, g, b);
+            document.querySelector('.current-color').style.backgroundColor = currentColor;
+            document.getElementById('colorHexValue').textContent = currentColor.toUpperCase();
+            updateSliderValues();
+        });
+    });
+
+    // Gestion des confirmations des modals
+    document.getElementById('confirmColor').addEventListener('click', () => {
+        if (currentButton) {
+            currentButton.style.backgroundColor = currentColor;
+            if (currentButton === nameColorButton) {
+                nameColorPicker.value = currentColor;
+            }
+        }
+        colorPickerModal.hide();
+    });
+
+    document.getElementById('confirmNewKapBtn').addEventListener('click', () => {
+        const newTeamName = document.getElementById('newTeamInput').value.trim();
+        const newTeamColor = newTeamColorButton.style.backgroundColor;
+        
+        if (!newTeamName) {
+            alert('Veuillez entrer un nom pour le KAP');
+            return;
+        }
+
+        // Mettre à jour le bouton de sélection principal
+        teamSelectBtn.textContent = newTeamName;
+        
+        // Sauvegarder le nouveau KAP sélectionné
+        selectedTeamOption = null;
+        teamInput.value = newTeamName;
+        if (newTeamColor.startsWith('rgb')) {
+            const [r, g, b] = newTeamColor.match(/\d+/g).map(Number);
+            teamColorPicker.value = rgbToHex(r, g, b);
+        } else {
+            teamColorPicker.value = newTeamColor;
+        }
+
+        newKapModal.hide();
+    });
+
+    // Chargement des équipes
+    function createTeamOption(team, color) {
+        const option = document.createElement('div');
+        option.className = 'team-option';
+        option.innerHTML = `
+            <div class="team-color" style="background-color: ${color}"></div>
+            <div class="team-name">${team}</div>
+        `;
+        option.dataset.team = team;
+        option.dataset.color = color;
+
+        option.addEventListener('click', () => {
+            document.querySelectorAll('.team-option').forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            selectedTeamOption = option;
+            teamSelectBtn.textContent = team;
+            document.getElementById('teamPreviewColor').style.backgroundColor = color;
+            document.getElementById('teamPreviewColor').style.display = 'block';
+            teamSelectModal.hide();
+        });
+
+        return option;
+    }
+
+    axios.get('/api/teamlist')
+        .then(response => {
+            const teams = response.data;
+            const teamList = document.querySelector('.team-list');
+            teamList.innerHTML = '';
+
+            Object.keys(teams).forEach(team => {
+                const option = createTeamOption(team, teams[team]);
+                teamList.appendChild(option);
+            });
+
+            loadFromCookies();
+        })
+        .catch(error => console.error('Error fetching teams:', error));
+
+    // Fonction de chargement depuis les cookies
+    function loadFromCookies() {
+        const savedUsername = getCookie('username');
+        const savedTeam = getCookie('team');
+        const savedNameColor = getCookie('nameColor');
+        const savedTeamColor = getCookie('teamColor');
+
+        if (savedUsername) {
+            document.getElementById('username').value = savedUsername;
+        }
+
+        if (savedNameColor) {
+            nameColorPicker.value = savedNameColor;
+            nameColorButton.style.backgroundColor = savedNameColor;
+        } else {
+            const randomColor = getRandomColor();
+            nameColorPicker.value = randomColor;
+            nameColorButton.style.backgroundColor = randomColor;
+        }
+
+        if (savedTeam) {
+            const teamOptions = document.querySelectorAll('.team-option');
+            const teamOption = Array.from(teamOptions).find(option => option.dataset.team === savedTeam);
+
+            if (teamOption) {
+                teamOption.click();
+            } else if (savedTeam && savedTeamColor) {
+                teamSelectBtn.textContent = savedTeam;
+                teamInput.value = savedTeam;
+            }
+        }
+    }
+
+    // Gestion du bouton de confirmation principal
+    document.getElementById('confirmBtn').addEventListener('click', function() {
+        const username = document.getElementById('username').value;
+        let team, teamColor;
+
+        if (selectedTeamOption) {
+            team = selectedTeamOption.dataset.team;
+            teamColor = false;
+        } else {
+            team = document.getElementById('newTeamInput').value.trim();
+            if (!team) {
+                alert('Sélectionnez ou ajoutez un KAP');
+                return;
+            }
+            teamColor = newTeamColorButton.style.backgroundColor;
+            if (teamColor.startsWith('rgb')) {
+                const [r, g, b] = teamColor.match(/\d+/g).map(Number);
+                teamColor = rgbToHex(r, g, b);
+            }
+        }
+
+        if (!username) {
+            alert('Entrez votre prénom');
+            return;
+        }
+
+        const nameColor = nameColorPicker.value;
+
+        setCookie('username', username, 6);
+        setCookie('team', team, 6);
+        setCookie('nameColor', nameColor, 6);
+        if (teamColor) {
+            setCookie('teamColor', teamColor, 6);
+        }
+
+        const postData = {
+            username: username,
+            team: team,
+            nameColor: nameColor,
+            teamColor: teamColor
+        };
+
+        axios.post('/api/set', postData)
+            .then(response => {
+                const { user_id } = response.data;
+                
+                if (response.data.code == 201) {
+                    const confirmation = confirm('Cette personne existe déjà dans ce KAP ! Êtes-vous bien cette personne ?');
+                    
+                    if (confirmation) {
+                        setCookie('user_id', user_id, 6);
+                        window.location.href = '/';
+                    }
+                } else {
+                    setCookie('user_id', user_id, 6);
+                    window.location.href = '/';
+                }
+            })
+            .catch(error => {
+                if (error.response) {
+                    alert(error.response.data.error);
+                } else {
+                    alert('Une erreur est survenue');
+                }
+            });
+    });
+
+    // Initialisation de la couleur aléatoire
+    const initialColor = getRandomColor();
+    nameColorPicker.value = initialColor;
+    nameColorButton.style.backgroundColor = initialColor;
+</script>
+</body>
+
+</html>

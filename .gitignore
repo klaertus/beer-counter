@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Flask
+instance/
+.webassets-cache
+
+# Database files
+*.db
+*.sqlite3
+
+# CSV files (optionnel - enlève cette ligne si tu veux versionner les CSV)
+# *.csv
+
+# Pictures uploads (optionnel)
+pictures/*
+!pictures/.gitkeep
+
+# Archives
+archives/*
+!archives/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

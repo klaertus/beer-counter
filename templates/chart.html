@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compteur de bières</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-color: #1e1e2f;
+            font-family: "Roboto", Arial, sans-serif;
+            color: white;
+            overflow: hidden;
+        }
+
+        .container-fluid {
+            height: 100vh;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .row {
+            flex: 1;
+            margin: 0;
+        }
+
+        .card {
+            background-color: #2c2c3e;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-container {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+        }
+
+        #mainChart {
+            position: absolute;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        h2 {
+            color: #ffffff;
+            font-family: 'Roboto'; 
+            font-size: 2rem;
+            font-weight: 1000;
+            margin: 0.5rem 0;
+        }
+
+        .title-container {
+            margin-bottom: 0.5rem;
+        }
+
+        .top-users-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .top-users-list li {
+            padding: 10px;
+            border-bottom: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .top-users-list li:last-child {
+            border-bottom: none;
+        }
+
+        .user-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 15px;
+            color: #ffffff;
+        }
+
+        .user-stats span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .user-stats i {
+            font-size: 1rem;
+        }
+        
+        .highcharts-background {
+            fill: transparent;
+        }
+        
+        .highcharts-title, .highcharts-axis-labels text {
+            fill: #ffffff !important;
+            font-weight: bold !important;
+        }
+        
+        .highcharts-legend-item text {
+            fill: #ffffff !important;
+        }
+
+        .highcharts-point-vomit {
+            filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.7));
+            animation: pulse-ghost 2s infinite;
+        }
+
+        .highcharts-point-vomit .highcharts-point {
+            fill: transparent !important;
+            stroke: white;
+            stroke-width: 2px;
+        }
+
+        .highcharts-point-vomit .highcharts-data-label text {
+            text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+            animation: float-ghost 3s ease-in-out infinite;
+        }
+
+        .ghost-animation {
+            animation: float-ghost 3s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        @keyframes float-ghost {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes pulse-ghost {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+        }
+
+        #mainChart {
+            width: 100% !important;
+            height: 100% !important;
+            min-height: 400px;
+        }
+
+        @media (max-width: 768px) {
+            #mainChart {
+                min-height: 300px;
+            }
+            
+            .highcharts-axis-labels text {
+                font-size: 10px !important;
+            }
+            
+            .highcharts-legend-item text {
+                font-size: 10px !important;
+            }
+        }
+
+        @media (max-width: 576px) {
+            #mainChart {
+                min-height: 250px;
+            }
+            
+            .highcharts-axis-labels text {
+                font-size: 8px !important;
+            }
+            
+            .highcharts-legend-item text {
+                font-size: 8px !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="title-container">
+            <h2 class="text-center">Compteur de Bières de l'Electrokot</h2>
+        </div>
+        <div class="row g-1">
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="chart-container">
+                        <div id="mainChart"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 mb-1" style="height: 60%;">
+                    <h2 class="text-center">Top 10 Buveurs</h2>
+                    <ul class="top-users-list" id="topUsersList" style="height: calc(100% - 40px); overflow-y: auto;">
+                    </ul>
+                </div>
+                <div class="card p-3" style="height: 40%;">
+                    <div id="teamChart" class="w-100 h-100"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+    <script>
+        Highcharts.setOptions({
+            time: {
+                timezone: 'Europe/Brussels'
+            }
+        });
+
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        async function getData() {
+            try {
+                const response = await fetch('/api/data');
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la récupération des données');
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Erreur:', error);
+                return [];
+            }
+        }
+
+        async function getUserColors() {
+            try {
+                const response = await fetch('/api/userlist');
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la récupération des couleurs des utilisateurs');
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Erreur:', error);
+                return {};
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            let mainChart;
+            let teamChart;
+            let users = {};
+            function createMainChart() {
+                const chartContainer = document.querySelector('.chart-container');
+                
+                mainChart = Highcharts.chart('mainChart', {
+                    chart: {
+                        type: 'line',
+                        backgroundColor: 'transparent',
+                        animation: false,
+                        style: {
+                            fontFamily: 'Roboto, sans-serif'
+                        },
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    navigation: {
+                        buttonOptions: {
+                            enabled: false
+                        }
+                    },
+                    title: {
+                        text: null
+                    },
+                    xAxis: {
+                        type: 'datetime',
+                        labels: {
+                            format: '{value:%H:%M}',
+                            style: {
+                                color: '#ffffff',
+                                fontSize: '18px',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        lineColor: '#444',
+                        tickColor: '#444'
+                    },
+                    yAxis: {
+                        title: {
+                            text: null
+                        },
+                        min: null,
+                        startOnTick: true,
+                        endOnTick: true,
+                        allowDecimals: false,
+                        labels: {
+                            style: {
+                                color: '#ffffff',
+                                fontSize: '18px',
+                                fontWeight: 'bold'
+                            },
+                            align: 'right',
+                            x: -10
+                        },
+                        gridLineColor: '#333'
+                    },
+                    legend: {
+                        enabled: true,
+                        align: 'center',
+                        verticalAlign: 'top',
+                        alignColumns: false,
+                        layout: 'horizontal',
+                        borderWidth: 0,
+                        borderRadius: 5,
+                        itemDistance: 10,
+                        padding: 8,
+                        itemStyle: {
+                            color: '#ffffff',
+                            fontWeight: 'bold',
+                            fontSize: '16px'
+                        },
+                        symbolWidth: 0,
+                        symbolHeight: 0,
+                        symbolRadius: 0,
+                        symbolPadding: 5,
+                        itemMarginTop: 2,
+                        itemMarginBottom: 2,
+                        useHTML: true,
+                        labelFormatter: function() {
+                            return '<span style="display:inline-block; width:20px; height:16px; background-color:' +
+                                this.color + '; margin-right:5px; border-radius:3px;"></span>' + this.name;
+                        },
+                    },
+                    plotOptions: {
+                        series: {
+                            animation: false,
+                            marker: { 
+                                enabled: true, 
+                                radius: 4,
+                                symbol: "circle"
+                            },
+                            lineWidth: 2,
+                            states: {
+                                hover: {
+                                    lineWidth: 3
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        shared: true,
+                        backgroundColor: '#333',
+                        style: {
+                            color: '#fff',
+                            fontSize: '14px'
+                        },
+                        formatter: function() {
+                            let s = '<b>' + Highcharts.dateFormat('%H:%M:%S', this.x) + '</b>';
+                            this.points.forEach(point => {
+                                const isVomit = point.point.isVomit;
+                                const icon = isVomit ? '👻' : '🍺';
+                                const value = isVomit ? 'Vomissement' : point.y;
+                                s += '<br/>' + icon + ' <span style="color:' + point.series.color + '">' + point.series.name + '</span>: ' + value;
+                            });
+                            return s;
+                        },
+                        useHTML: true
+                    },
+                    series: []
+                });
+
+                const resizeObserver = new ResizeObserver(entries => {
+                    for (let entry of entries) {
+                        if (mainChart) {
+                            mainChart.setSize(entry.contentRect.width, entry.contentRect.height, false);
+                        }
+                    }
+                });
+
+                resizeObserver.observe(chartContainer);
+            }
+
+            function createTeamChart() {
+                teamChart = Highcharts.chart('teamChart', {
+                    chart: {
+                        type: 'pie',
+                        backgroundColor: 'transparent',
+                        animation: false,
+                        height: '70%',
+                        marginBottom: 5,
+                        spacing: [0, 0, 0, 0]
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    navigation: {
+                        buttonOptions: {
+                            enabled: false
+                        }
+                    },
+                    title: {
+                        text: null
+                    },
+                    plotOptions: {
+                        pie: {
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            borderWidth: 0,
+                            dataLabels: {
+                                enabled: true,
+                                format: '{point.y}', 
+                                distance: -30,
+                                style: {
+                                    color: '#ffffff',
+                                    fontSize: '16px',
+                                    fontWeight: 'bold',
+                                    textOutline: '0.1px contrast'
+                                }
+                            },
+                            showInLegend: true,
+                            animation: false,
+                            states: {
+                                hover: {
+                                    brightness: 0.1
+                                }
+                            }
+                        }
+                    },
+                    legend: {
+                        enabled: true,
+                        itemStyle: {
+                            color: '#ffffff',
+                            fontSize: '18px'
+                        },
+                        alignColumns: false,
+                        align: 'center',
+                        verticalAlign: 'top',
+                        itemMarginTop: 5,
+                        itemMarginBottom: 5,
+                        useHTML: true,
+                        labelFormatter: function() {
+                            return '<span style="display:flex; align-items:center;"><span style="display:inline-block; width:20px; height:18px; background-color:' +
+                                this.color + '; margin-right:8px; border-radius:3px;"></span>' + 
+                                this.name + ' - <span style="margin-left:5px;"><i class="fas fa-beer"></i> ' + this.y + 
+                                '</span> <span style="margin-left:5px;"><i class="fas fa-ghost"></i> ' + (this.options.vomitCount || 0) + '</span></span>';
+                        },
+                        symbolWidth: 0,
+                        symbolHeight: 0,
+                        symbolRadius: 0
+                    },
+                    tooltip: {
+                        pointFormat: '<b><i class="fas fa-beer"></i> {point.y} bières</b><br><b><i class="fas fa-ghost"></i> {point.vomitCount} vomissements</b>',
+                        backgroundColor: 'rgba(50, 50, 70, 0.9)',
+                        borderWidth: 0,
+                        borderRadius: 8,
+                        shadow: true,
+                        style: {
+                            color: '#ffffff',
+                            fontSize: '14px'
+                        },
+                        useHTML: true
+                    },
+                    series: [{
+                        name: 'Équipes',
+                        data: [],
+                    }],
+                });
+            }
+
+            async function updateMainChart() {
+                const serverData = await getData();
+                const userColors = await getUserColors();
+                const userDataMap = new Map();
+                serverData.forEach(entry => {
+                    const { id, username, team, timestamp, cumulative_count, count } = entry;
+                    const timeMs = new Date(timestamp).getTime();
+                    
+                    if (!userDataMap.has(id)) {
+                        userDataMap.set(id, {
+                            id: id,
+                            name: username,
+                            team: team,
+                            color: userColors[id]?.color,
+                            data: []
+                        });
+                    }
+                    
+                    const userData = userDataMap.get(id);
+                    if (count === 1) {
+                        userData.data.push({
+                            x: timeMs,
+                            y: cumulative_count
+                        });
+                    } else if (count === -1) {
+                        userData.data.push({
+                            x: timeMs,
+                            y: cumulative_count,
+                            marker: {
+                                symbol: 'circle',
+                                fillColor: '#ffffff',
+                                radius: 8,
+                            },
+                            isVomit: true
+                        });
+                    }
+                });
+                for (const userData of userDataMap.values()) {
+                    userData.data.sort((a, b) => {
+                        return a.x - b.x;
+                    });
+                }
+                while (mainChart.series.length > 0) {
+                    mainChart.series[0].remove(false);
+                }
+                for (const userData of userDataMap.values()) {
+                    mainChart.addSeries({
+                        name: userData.name,
+                        data: userData.data,
+                        color: userData.color,
+                        userID: userData.id,
+                        zIndex: 2,
+                        marker: {
+                            enabled: true,
+                            radius: 4,
+                            symbol: 'circle'
+                        },
+                        dataLabels: {
+                            enabled: false
+                        }
+                    }, false);
+                }
+                mainChart.redraw();
+            }
+
+            function updateTeamChart() {
+                fetch('/api/teamdata')
+                    .then(response => response.json())
+                    .then(teamData => {
+                        const pieData = teamData.map(entry => ({
+                            name: `${entry.team}`,
+                            y: entry.beer_count,
+                            vomitCount: entry.vomit_count,
+                            color: entry.team_color
+                        }));
+                        teamChart.series[0].setData(pieData);
+                    })
+                    .catch(error => console.error('Error fetching team data:', error));
+            }
+
+            async function updateTop10() {
+                try {
+                    const response = await fetch('/api/top10');
+                    const topUsers = await response.json();
+                    const topUsersList = document.getElementById('topUsersList');
+                    const tempContainer = document.createElement('div');
+                    tempContainer.style.display = 'none';
+                    
+                    for (const user of topUsers) {
+                        const userInfoResponse = await fetch(`/api/userinfo/${user.id}`);
+                        const userInfo = await userInfoResponse.json();
+                        const userDetails = userInfo[0];
+
+                        const li = document.createElement('li');
+                        const userInfoDiv = document.createElement('div');
+                        userInfoDiv.className = 'user-info';
+                        userInfoDiv.innerHTML = `
+                            <span style="font-weight: bold">${user.username}</span>
+                            <span style="color: #888">(${user.team})</span>
+                        `;
+                        const statsDiv = document.createElement('div');
+                        statsDiv.className = 'user-stats';
+                        statsDiv.innerHTML = `
+                            <span><i class="fas fa-beer"></i> ${user.count}</span>
+                            <span><i class="fas fa-ghost"></i> ${userDetails.vomit_count}</span>
+                        `;
+                        
+                        li.appendChild(userInfoDiv);
+                        li.appendChild(statsDiv);
+                        tempContainer.appendChild(li);
+                    }
+                    topUsersList.innerHTML = '';
+                    while (tempContainer.firstChild) {
+                        topUsersList.appendChild(tempContainer.firstChild);
+                    }
+                } catch (error) {
+                    console.error('Error updating top 10:', error);
+                }
+            }
+
+            createMainChart();
+            createTeamChart();
+            updateMainChart();
+            updateTeamChart();
+            updateTop10();
+            setInterval(updateMainChart, 2000);
+            setInterval(updateTeamChart, 2000);
+            setInterval(updateTop10, 2000);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#2c2c3e" rx="100" ry="100"/>
+  <g transform="translate(256, 256) scale(0.8)">
+    <path d="M-100,-100 L100,-100 L150,100 L-150,100 Z" fill="#9575cd" />
+    <circle cx="0" cy="-20" r="60" fill="#5c6bc0" />
+    <path d="M-40,20 Q0,60 40,20 L30,100 L-30,100 Z" fill="#ffb74d" />
+    <path d="M-20,120 L20,120 L15,150 L-15,150 Z" fill="#ffb74d" />
+  </g>
+  <text x="256" y="400" font-family="Arial" font-size="40" text-anchor="middle" fill="white">Beer Counter</text>
+</svg> 
