@@ -380,7 +380,44 @@
 </head>
 
 <body>
+    {% if not app_running %}
+    <!-- Application Not Running Message -->
+    <div class="container text-center" style="margin-top: 10vh;">
+        <div style="font-size: 4rem; color: #ff6b6b; margin-bottom: 1.5rem;">
+            <i class="fas fa-power-off"></i>
+        </div>
+        <h1 style="color: #ff6b6b; font-size: 2.5rem; margin-bottom: 1rem;">
+            Application Not Running
+        </h1>
+        <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 2rem;">
+            The beer counter application is currently stopped.<br>
+            Please contact an administrator to start the application.
+        </p>
+        <div style="margin-bottom: 2rem;">
+            <i class="fas fa-cog" style="font-size: 2rem; color: #666; margin: 0 1rem;"></i>
+            <i class="fas fa-users" style="font-size: 2rem; color: #666; margin: 0 1rem;"></i>
+            <i class="fas fa-palette" style="font-size: 2rem; color: #666; margin: 0 1rem;"></i>
+        </div>
+        <p style="font-size: 0.9rem; color: #666;">
+            <i class="fas fa-sync-alt fa-spin me-2"></i>
+            Checking status automatically...
+        </p>
+    </div>
+    {% else %}
+    <!-- Normal Application Content -->
     <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'warning' if category == 'warning' else 'info' }} alert-dismissible fade show" role="alert" style="background-color: {{ '#ff9800' if category == 'warning' else '#f44336' if category == 'error' else '#5c6bc0' }}; color: white; border: none; border-radius: 12px; margin-bottom: 1.5rem;">
+                        <i class="fas fa-{{ 'exclamation-triangle' if category == 'warning' else 'times-circle' if category == 'error' else 'info-circle' }} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
         <h1>Paramètres</h1>
         
         <div class="setup-form">
@@ -394,10 +431,10 @@
             </div>
 
             <div class="form-group">
-                <label for="teamSelect" class="form-label">Votre KAP</label>
+                <label for="teamSelect" class="form-label">Votre Équipe</label>
                 <div class="input-wrapper">
                     <button type="button" class="team-select" id="teamSelect">
-                        <span class="team-select-text">Sélectionnez votre KAP</span>
+                        <span class="team-select-text">Sélectionnez votre Équipe</span>
                         <div id="teamColorPreview" class="color-button" style="display: none;"></div>
                     </button>
                     <div class="form-feedback" id="teamFeedback"></div>
@@ -458,7 +495,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Choisissez votre KAP</h5>
+                    <h5 class="modal-title">Choisissez votre Équipe</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -466,7 +503,7 @@
                     </div>
                     
                     <button type="button" class="btn btn-secondary" id="addNewTeamBtn">
-                        <i class="fas fa-plus me-2"></i>Ajouter un nouveau KAP
+                        <i class="fas fa-plus me-2"></i>Ajouter un nouveau Équipe
                     </button>
                 </div>
             </div>
@@ -477,14 +514,14 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Nouveau KAP</h5>
+                    <h5 class="modal-title">Nouveau Équipe</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group mb-4">
-                        <label for="newTeamName" class="form-label">Nom du KAP</label>
+                        <label for="newTeamName" class="form-label">Nom du Équipe</label>
                         <div class="input-wrapper">
-                            <input type="text" class="form-control" id="newTeamName" placeholder="Entrez le nom du KAP" autocomplete="off">
+                            <input type="text" class="form-control" id="newTeamName" placeholder="Entrez le nom du Équipe" autocomplete="off">
                             <div id="newTeamColorButton" class="color-button"></div>
                             <div class="form-feedback" id="newTeamFeedback"></div>
                         </div>
@@ -645,8 +682,8 @@
                     });
                 })
                 .catch(error => {
-                    console.error('Erreur lors du chargement des KAPs:', error);
-                    showFeedback('teamFeedback', 'Impossible de charger la liste des KAPs');
+                    console.error('Erreur lors du chargement des Équipes:', error);
+                    showFeedback('teamFeedback', 'Impossible de charger la liste des Équipes');
                 });
         }
 
@@ -664,8 +701,8 @@
                     teamList.appendChild(teamOption);
                 });
             } catch (error) {
-                console.error('Erreur lors du chargement des KAPs:', error);
-                showFeedback('teamFeedback', 'Impossible de charger la liste des KAPs');
+                console.error('Erreur lors du chargement des Équipes:', error);
+                showFeedback('teamFeedback', 'Impossible de charger la liste des Équipes');
             }
         }
 
@@ -739,7 +776,7 @@
             } else if (savedTeam) {
                 setCookie('team', '', -1);
                 setCookie('teamColor', '', -1);
-                console.log(`KAP "${savedTeam}" n'existe plus dans la liste, cookies nettoyés.`);
+                console.log(`Équipe "${savedTeam}" n'existe plus dans la liste, cookies nettoyés.`);
             }
         }
 
@@ -825,7 +862,7 @@
             const teamColor = newTeamColorButton.dataset.color;
             
             if (!teamName) {
-                showFeedback('newTeamFeedback', 'Veuillez entrer un nom pour le KAP');
+                showFeedback('newTeamFeedback', 'Veuillez entrer un nom pour le Équipe');
                 return;
             }
             
@@ -852,7 +889,7 @@
             }
             
             if (!selectedTeamData) {
-                showFeedback('teamFeedback', 'Veuillez sélectionner ou créer un KAP');
+                showFeedback('teamFeedback', 'Veuillez sélectionner ou créer un Équipe');
                 return;
             }
             
@@ -880,7 +917,7 @@
                     const userId = response.data.user_id;
                     
                     if (response.data.code == 201) {
-                        const confirmation = confirm('Cette personne existe déjà dans ce KAP ! Êtes-vous bien cette personne ?');
+                        const confirmation = confirm('Cette personne existe déjà dans ce Équipe ! Êtes-vous bien cette personne ?');
                         
                         if (confirmation) {
                             setCookie('user_id', userId, 24);
@@ -910,5 +947,28 @@
     <a href="/credits" class="info-icon" title="Crédits et informations">
         <i class="fas fa-info"></i>
     </a>
+    {% endif %}
+
+    <script>
+        // Auto-refresh functionality for app status
+        let currentAppStatus = {{ 'true' if app_running else 'false' }};
+        
+        async function checÉquipepStatus() {
+            try {
+                const response = await fetch('/api/app/status');
+                const data = await response.json();
+                
+                if (data.running !== currentAppStatus) {
+                    // Status changed, reload the page
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error('Error checking app status:', error);
+            }
+        }
+        
+        // Check app status every 5 seconds
+        setInterval(checÉquipepStatus, 5000);
+    </script>
 </body>
 </html>

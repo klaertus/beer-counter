@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Beer Counter</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #1e1e1e;
+            --container-bg: #2c2c2c;
+            --input-bg: #3a3a3a;
+            --component-bg: #3a3a3a;
+            --primary-color: #5c6bc0;
+            --primary-hover: #3f51b5;
+            --secondary-color: #9575cd;
+            --success-color: #4caf50;
+            --warning-color: #ff9800;
+            --danger-color: #f44336;
+            --text-light: #ffffff;
+            --text-muted: #a0a0a0;
+            --border-radius-lg: 16px;
+            --border-radius-md: 12px;
+            --border-radius-sm: 8px;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--container-bg), #333333) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            color: var(--primary-color) !important;
+            font-weight: 700;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            color: var(--primary-hover) !important;
+            transform: translateY(-1px);
+        }
+
+        .navbar-nav .nav-link {
+            color: var(--text-light) !important;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem !important;
+            margin: 0 0.25rem;
+            border-radius: var(--border-radius-sm);
+            font-weight: 500;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: var(--primary-color) !important;
+            background-color: rgba(92, 107, 192, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .navbar-nav .nav-link.active {
+            color: var(--primary-color) !important;
+            background-color: rgba(92, 107, 192, 0.2);
+            font-weight: 600;
+        }
+
+        .container-fluid {
+            padding: 2rem;
+        }
+
+        .stat-card {
+            background-color: var(--component-bg);
+            border-radius: var(--border-radius-md);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-number {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-admin {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius-md);
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-admin:hover {
+            background: linear-gradient(135deg, var(--primary-hover), #303f9f);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(92, 107, 192, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-secondary-admin {
+            background: linear-gradient(135deg, var(--secondary-color), #7e57c2);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius-md);
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-secondary-admin:hover {
+            background: linear-gradient(135deg, #7e57c2, #673ab7);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(149, 117, 205, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-danger-admin {
+            background: linear-gradient(135deg, var(--danger-color), #d32f2f);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius-md);
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+
+        .btn-danger-admin:hover {
+            background: linear-gradient(135deg, #d32f2f, #c62828);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .table-dark {
+            background-color: var(--component-bg);
+            border-radius: var(--border-radius-md);
+            overflow: hidden;
+        }
+
+        .table-dark th {
+            background-color: var(--container-bg);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+        }
+
+        .table-dark td {
+            border-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+        }
+
+        .color-preview {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            vertical-align: middle;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-light);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .quick-actions {
+            background-color: var(--component-bg);
+            border-radius: var(--border-radius-md);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .alert {
+            border-radius: var(--border-radius-md);
+            border: none;
+        }
+
+        .alert-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .alert-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .alert-info {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-updating {
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .status-updated {
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('admin_dashboard') }}">
+                <i class="fas fa-shield-alt me-2"></i>
+                Beer Counter Admin
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('admin_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_users') }}">
+                            <i class="fas fa-users me-1"></i>Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_teams') }}">
+                            <i class="fas fa-users-cog me-1"></i>Teams
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_photos') }}">
+                            <i class="fas fa-images me-1"></i>Photos
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>Main App
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_logout') }}">
+                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Application Status Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="quick-actions">
+                    <h3 class="section-title">
+                        <i class="fas fa-power-off me-2"></i>
+                        Application Control
+                    </h3>
+                    <div class="row align-items-center">
+                        <div class="col-md-3">
+                            <div class="stat-card text-center" id="app-status-card">
+                                <div class="stat-icon" id="app-status-icon">
+                                    <i class="fas fa-{{ 'play-circle text-success' if app_status.running else 'stop-circle text-danger' }}"></i>
+                                </div>
+                                <div class="stat-number" id="app-status-text">{{ app_status.status_text }}</div>
+                                <div class="stat-label">
+                                    Application Status
+                                    <br>
+                                    <small class="text-muted" style="font-size: 0.7rem;">
+                                        <i class="fas fa-sync-alt" id="status-refresh-icon" style="animation: spin 1s linear infinite; opacity: 0.5;"></i>
+                                        Auto-updating
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                                <button class="btn-admin" id="start-app-btn" onclick="controlApp('start')" {{ 'disabled' if app_status.running else '' }}>
+                                    <i class="fas fa-play me-2"></i>Start Application
+                                </button>
+                                <button class="btn btn-warning" id="restart-app-btn" onclick="controlApp('restart')" style="background: linear-gradient(135deg, #ff9800, #f57c00) !important; border: none !important; color: white !important; padding: 0.75rem 1.5rem !important; border-radius: 12px !important; font-weight: 600 !important; transition: all 0.3s ease !important;">
+                                    <i class="fas fa-redo me-2"></i>Restart Application
+                                </button>
+                                <button class="btn-danger-admin" id="stop-app-btn" onclick="controlApp('stop')" {{ 'disabled' if not app_status.running else '' }}>
+                                    <i class="fas fa-stop me-2"></i>Stop Application
+                                </button>
+                                <a href="{{ url_for('admin_reset') }}" class="btn btn-outline-danger" style="padding: 0.75rem 1.5rem; border-radius: 12px; font-weight: 600; transition: all 0.3s ease; border: 2px solid var(--danger-color); color: var(--danger-color); text-decoration: none;">
+                                    <i class="fas fa-trash-alt me-2"></i>Reset Data
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <div class="stat-icon text-primary">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number">{{ users|length }}</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <div class="stat-icon text-info">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <div class="stat-number">{{ teams|length }}</div>
+                    <div class="stat-label">Total Teams</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <div class="stat-icon text-success">
+                        <i class="fas fa-beer"></i>
+                    </div>
+                    <div class="stat-number">{{ users|sum(attribute='drink_count') }}</div>
+                    <div class="stat-label">Total Beers</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <div class="stat-icon text-warning">
+                        <i class="fas fa-ghost"></i>
+                    </div>
+                    <div class="stat-number">{{ users|sum(attribute='vomit_count') }}</div>
+                    <div class="stat-label">Total Vomits</div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-md-6">
+                <h3 class="section-title">Recent Users</h3>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Team</th>
+                                <th>Beers</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users[:10] %}
+                            <tr>
+                                <td>
+                                    <span class="color-preview me-2" style="background-color: {{ user.color }}"></span>
+                                    {{ user.username }}
+                                </td>
+                                <td>
+                                    <span class="color-preview me-2" style="background-color: {{ user.team_color }}"></span>
+                                    {{ user.team }}
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">{{ user.drink_count }}</span>
+                                    {% if user.vomit_count > 0 %}
+                                        <span class="badge bg-warning ms-1">{{ user.vomit_count }} 🤮</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('admin_user_drinks', user_id=user.id) }}" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-list"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h3 class="section-title">Team Statistics</h3>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th>Team</th>
+                                <th>Users</th>
+                                <th>Beers</th>
+                                <th>Vomits</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in teams %}
+                            <tr>
+                                <td>
+                                    <span class="color-preview me-2" style="background-color: {{ team.color }}"></span>
+                                    {{ team.team }}
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ team.user_count }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">{{ team.beer_count }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-warning">{{ team.vomit_count }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function controlApp(action) {
+            const buttons = {
+                'start': document.getElementById('start-app-btn'),
+                'stop': document.getElementById('stop-app-btn'),
+                'restart': document.getElementById('restart-app-btn')
+            };
+            
+            // Store original button states
+            const originalStates = {};
+            Object.keys(buttons).forEach(key => {
+                if (buttons[key]) {
+                    originalStates[key] = {
+                        disabled: buttons[key].disabled,
+                        innerHTML: buttons[key].innerHTML
+                    };
+                }
+            });
+            
+            // Disable all buttons during request
+            Object.values(buttons).forEach(btn => {
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                }
+            });
+            
+            fetch(`/admin/api/app/${action}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    // Show success message
+                    showAlert(data.message, 'success');
+                    // Update UI based on new status
+                    updateAppStatus(data.status === 'running');
+                } else if (data.error) {
+                    showAlert(data.error, 'danger');
+                    // Restore original states on error
+                    Object.keys(buttons).forEach(key => {
+                        if (buttons[key] && originalStates[key]) {
+                            buttons[key].disabled = originalStates[key].disabled;
+                            buttons[key].innerHTML = originalStates[key].innerHTML;
+                        }
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('An error occurred while controlling the application', 'danger');
+                // Restore original states on error
+                Object.keys(buttons).forEach(key => {
+                    if (buttons[key] && originalStates[key]) {
+                        buttons[key].disabled = originalStates[key].disabled;
+                        buttons[key].innerHTML = originalStates[key].innerHTML;
+                    }
+                });
+            });
+        }
+        
+        function updateAppStatus(isRunning) {
+            const statusIcon = document.getElementById('app-status-icon');
+            const statusText = document.getElementById('app-status-text');
+            const startBtn = document.getElementById('start-app-btn');
+            const stopBtn = document.getElementById('stop-app-btn');
+            const restartBtn = document.getElementById('restart-app-btn');
+            
+            if (isRunning) {
+                statusIcon.innerHTML = '<i class="fas fa-play-circle text-success"></i>';
+                statusText.textContent = 'Running';
+                if (startBtn) {
+                    startBtn.disabled = true;
+                    startBtn.innerHTML = '<i class="fas fa-play me-2"></i>Start Application';
+                }
+                if (stopBtn) {
+                    stopBtn.disabled = false;
+                    stopBtn.innerHTML = '<i class="fas fa-stop me-2"></i>Stop Application';
+                }
+            } else {
+                statusIcon.innerHTML = '<i class="fas fa-stop-circle text-danger"></i>';
+                statusText.textContent = 'Stopped';
+                if (startBtn) {
+                    startBtn.disabled = false;
+                    startBtn.innerHTML = '<i class="fas fa-play me-2"></i>Start Application';
+                }
+                if (stopBtn) {
+                    stopBtn.disabled = true;
+                    stopBtn.innerHTML = '<i class="fas fa-stop me-2"></i>Stop Application';
+                }
+            }
+            
+            // Always reset restart button
+            if (restartBtn) {
+                restartBtn.disabled = false;
+                restartBtn.innerHTML = '<i class="fas fa-redo me-2"></i>Restart Application';
+            }
+        }
+        
+        function resetButtons() {
+            const startBtn = document.getElementById('start-app-btn');
+            const stopBtn = document.getElementById('stop-app-btn');
+            const restartBtn = document.getElementById('restart-app-btn');
+            
+            if (startBtn) {
+                startBtn.innerHTML = '<i class="fas fa-play me-2"></i>Start Application';
+            }
+            if (stopBtn) {
+                stopBtn.innerHTML = '<i class="fas fa-stop me-2"></i>Stop Application';
+            }
+            if (restartBtn) {
+                restartBtn.disabled = false;
+                restartBtn.innerHTML = '<i class="fas fa-redo me-2"></i>Restart Application';
+            }
+        }
+        
+        function showAlert(message, type) {
+            // Create alert element
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // Insert at the top of the container
+            const container = document.querySelector('.container-fluid');
+            container.insertBefore(alertDiv, container.firstChild);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+        
+        // Check app status periodically (every 5 seconds)
+        function checkAppStatusPeriodically() {
+            const statusCard = document.getElementById('app-status-card');
+            const refreshIcon = document.getElementById('status-refresh-icon');
+            
+            // Add visual feedback for updating
+            if (statusCard) statusCard.classList.add('status-updating');
+            if (refreshIcon) refreshIcon.style.opacity = '1';
+            
+            fetch('/admin/api/app/status')
+                .then(response => response.json())
+                .then(data => {
+                    updateAppStatus(data.running);
+                    
+                    // Visual feedback for successful update
+                    setTimeout(() => {
+                        if (statusCard) statusCard.classList.remove('status-updating');
+                        if (statusCard) statusCard.classList.add('status-updated');
+                        if (refreshIcon) refreshIcon.style.opacity = '0.5';
+                        
+                        setTimeout(() => {
+                            if (statusCard) statusCard.classList.remove('status-updated');
+                        }, 300);
+                    }, 200);
+                })
+                .catch(error => {
+                    console.error('Error checking app status:', error);
+                    
+                    // Reset visual feedback on error
+                    if (statusCard) statusCard.classList.remove('status-updating');
+                    if (refreshIcon) refreshIcon.style.opacity = '0.5';
+                });
+        }
+
+        // Start periodic status checking
+        setInterval(checkAppStatusPeriodically, 5000);
+        
+        // Also check immediately when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initial status check after a short delay
+            setTimeout(checkAppStatusPeriodically, 1000);
+        });
+    </script>
+</body>
+</html>

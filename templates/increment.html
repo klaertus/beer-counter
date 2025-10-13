@@ -203,6 +203,23 @@
             cursor: not-allowed;
         }
 
+        .btn.uploading {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            animation: uploadPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes uploadPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(92, 107, 192, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(92, 107, 192, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(92, 107, 192, 0);
+            }
+        }
+
         .btn .icon {
             font-size: 1.2rem;
         }
@@ -323,12 +340,37 @@
 </head>
 
 <body>
+    {% if not app_running %}
+    <!-- Application Not Running Message -->
+    <div class="container text-center" style="margin-top: 10vh;">
+        <div style="font-size: 4rem; color: #ff6b6b; margin-bottom: 1.5rem;">
+            <i class="fas fa-power-off"></i>
+        </div>
+        <h1 style="color: #ff6b6b; font-size: 2.5rem; margin-bottom: 1rem;">
+            Application Not Running
+        </h1>
+        <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 2rem;">
+            The beer counter application is currently stopped.<br>
+            Please contact an administrator to start the application.
+        </p>
+        <div style="margin-bottom: 2rem;">
+            <i class="fas fa-beer" style="font-size: 2rem; color: #666; margin: 0 1rem;"></i>
+            <i class="fas fa-plus-circle" style="font-size: 2rem; color: #666; margin: 0 1rem;"></i>
+            <i class="fas fa-users" style="font-size: 2rem; color: #666; margin: 0 1rem;"></i>
+        </div>
+        <p style="font-size: 0.9rem; color: #666;">
+            <i class="fas fa-sync-alt fa-spin me-2"></i>
+            Checking status automatically...
+        </p>
+    </div>
+    {% else %}
+    <!-- Normal Application Content -->
     <a href="/setup" class="back-button">
         <i class="fas fa-arrow-left"></i>
         <span>Retour aux paramètres</span>
     </a>
 
-    <div class="container">
+    <div class="container" id="main-content">
         <h1>Vos Bières</h1>
         
         <div id="cooldownAlert" style="display: none;" class="alert fade-in">
@@ -371,7 +413,7 @@
 
             <div class="row align-items-center">
                 <div class="col-6">
-                    <span class="info-label">KAP:</span>
+                    <span class="info-label">Équipe:</span>
                     <span id="displayTeam" class="info-value"></span>
                 </div>
                 <div class="col-6 d-flex align-items-center">
@@ -383,11 +425,11 @@
 
         <input type="file" class="d-none" id="selfieInput" accept="image/*" capture="environment">
 
-        <button class="btn btn-secondary" id="vomitBtn">
+        <!-- <button class="btn btn-secondary" id="vomitBtn">
             <i class="fas fa-ghost icon"></i>
             <span>+1 Vomit</span>
             <i class="fas fa-ghost icon"></i>
-        </button>
+        </button>  -->
         
         <button class="btn btn-primary" id="beerBtn">
             <i class="fas fa-beer icon"></i>
@@ -438,6 +480,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
+    </script>
+    <script>
         const ENDPOINTS = {
             USER_INFO: '/api/userinfo/',
             INCREMENT_BEER: '/api/incrementBeer',
@@ -452,7 +496,7 @@
         const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
 
         const beerBtn = document.getElementById('beerBtn');
-        const vomitBtn = document.getElementById('vomitBtn');
+        const vomitBtn = document.getElementById('vomitBtn'); // May be null if commented out
         const selfieInput = document.getElementById('selfieInput');
         const yesPhotoBtn = document.getElementById('yesPhotoBtn');
         const noPhotoBtn = document.getElementById('noPhotoBtn');
@@ -547,48 +591,104 @@
         async function fetchUserInfo() {
             try {
                 const response = await axios.get(`${ENDPOINTS.USER_INFO}${userId}`);
+                
+                if (!response.data || response.data.length === 0) {
+                    // User not found, redirect to setup with message
+                    console.warn('User not found in database');
+                    alert('Votre profil n\'a pas été trouvé. Veuillez reconfigurer vos paramètres.');
+                    window.location.href = '/setup';
+                    return;
+                }
+                
                 userData = response.data[0];
                 updateUI();
             } catch (error) {
                 console.error('Error fetching user info:', error);
-                alert('Erreur lors de la récupération de vos informations!');
+                
+                if (error.response && error.response.status === 404) {
+                    alert('Votre profil n\'a pas été trouvé. Veuillez reconfigurer vos paramètres.');
+                } else {
+                    alert('Erreur lors de la récupération de vos informations!');
+                }
+                
                 window.location.href = '/setup';
             }
         }
 
         async function incrementBeer(formData) {
-            const originalContent = beerBtn.innerHTML;
-            beerBtn.disabled = true;
+            const hasPhoto = formData.has('selfie');
+            
+            // Store original content only if button is not already in loading state
+            const alreadyLoading = beerBtn.disabled && beerBtn.classList.contains('uploading');
+            let originalContent = alreadyLoading ? `
+                <i class="fas fa-beer icon"></i>
+                <span>+1 Bière</span>
+                <i class="fas fa-beer icon"></i>
+            ` : beerBtn.innerHTML;
+            
+            if (!alreadyLoading) {
+                beerBtn.disabled = true;
+                if (hasPhoto) {
+                    beerBtn.classList.add('uploading');
+                }
+            }
+            
             try {
-                beerBtn.innerHTML = `
+                // Update loading message based on whether there's a photo
+                beerBtn.innerHTML = hasPhoto ? `
                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    <span>Chargement...</span>
+                    <span>Upload photo...</span>
+                ` : `
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span>Comptage...</span>
                 `;
                 
+                // Configuration avec timeout pour les uploads
+                const config = {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                    timeout: hasPhoto ? 30000 : 10000, // 30s pour photo, 10s sans photo
+                    onUploadProgress: hasPhoto ? (progressEvent) => {
+                        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                        beerBtn.innerHTML = `
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span>Upload ${percentCompleted}%</span>
+                        `;
+                    } : undefined
+                };
+                
                 // Effectuer la requête
-                const response = await axios.post(ENDPOINTS.INCREMENT_BEER, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
+                const response = await axios.post(ENDPOINTS.INCREMENT_BEER, formData, config);
 
                 beerBtn.disabled = false;
                 beerBtn.innerHTML = originalContent;
+                beerBtn.classList.remove('uploading');
                 
                 // Traitement normal de la réponse
                 selfieInput.value = '';
-                confirmationMessage.textContent = `Bière comptabilisée pour ${response.data.username} du KAP ${response.data.team}`;
+                confirmationMessage.textContent = `Bière comptabilisée pour ${response.data.username} du Équipe ${response.data.team}`;
                 fetchUserInfo();
                 confirmationModal.show();
 
             } catch (error) {
                 beerBtn.disabled = false;
                 beerBtn.innerHTML = originalContent;
+                beerBtn.classList.remove('uploading');
                 
-                // Gestion des erreurs
-                handleIncrementError(error);
+                // Gestion spécifique des erreurs de timeout
+                if (error.code === 'ECONNABORTED') {
+                    alert(hasPhoto ? 
+                        'Timeout lors de l\'upload de la photo. Vérifiez votre connexion et réessayez.' :
+                        'Timeout lors de l\'envoi. Vérifiez votre connexion et réessayez.'
+                    );
+                } else {
+                    // Gestion des autres erreurs
+                    handleIncrementError(error);
+                }
             }
         }
 
         async function incrementVomit(formData) {
+            if (!vomitBtn) return; // Button doesn't exist
             vomitBtn.disabled = true;
             const originalContent = vomitBtn.innerHTML;
             try {
@@ -602,7 +702,7 @@
                 vomitBtn.disabled = false;
                 vomitBtn.innerHTML = originalContent;
                 
-                confirmationMessage.textContent = `Vomissement comptabilisé pour ${response.data.username} du KAP ${response.data.team}`;
+                confirmationMessage.textContent = `Vomissement comptabilisé pour ${response.data.username} du Équipe ${response.data.team}`;
                 fetchUserInfo();
                 confirmationModal.show();
                 
@@ -647,16 +747,38 @@
                 photoModal.show();
             });
 
-            vomitBtn.addEventListener('click', () => {
-                incrementType = 'vomit';
-                const formData = new FormData();
-                formData.append('user_id', userId);
-                incrementVomit(formData);
-            });
+            if (vomitBtn) {
+                vomitBtn.addEventListener('click', () => {
+                    incrementType = 'vomit';
+                    const formData = new FormData();
+                    formData.append('user_id', userId);
+                    incrementVomit(formData);
+                });
+            }
 
             yesPhotoBtn.addEventListener('click', () => {
+                // Feedback immédiat pendant l'ouverture de l'appareil photo
+                beerBtn.innerHTML = `
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span>Ouverture caméra...</span>
+                `;
+                beerBtn.disabled = true;
+                
                 selfieInput.click();
                 photoModal.hide();
+                
+                // Si l'utilisateur annule la photo, restaurer le bouton après un délai
+                setTimeout(() => {
+                    if (!selfieInput.files.length) {
+                        beerBtn.innerHTML = `
+                            <i class="fas fa-beer icon"></i>
+                            <span>+1 Bière</span>
+                            <i class="fas fa-beer icon"></i>
+                        `;
+                        beerBtn.disabled = false;
+                        beerBtn.classList.remove('uploading');
+                    }
+                }, 3000);
             });
 
             noPhotoBtn.addEventListener('click', () => {
@@ -670,24 +792,39 @@
             selfieInput.addEventListener('change', function() {
                 const selfie = this.files[0];
                 if (selfie && incrementType === 'beer') {
-                    const formData = new FormData();
-                    formData.append('user_id', userId);
-                    formData.append('selfie', selfie);
-                    incrementBeer(formData);
+                    // Afficher le loading immédiatement
+                    const originalContent = beerBtn.innerHTML;
+                    beerBtn.disabled = true;
+                    beerBtn.classList.add('uploading');
+                    beerBtn.innerHTML = `
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span>Préparation photo...</span>
+                    `;
+                    
+                    // Petit délai pour permettre l'affichage du loading
+                    setTimeout(() => {
+                        const formData = new FormData();
+                        formData.append('user_id', userId);
+                        formData.append('selfie', selfie);
+                        incrementBeer(formData);
+                    }, 100);
                 }
             });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            if (!userId) {
-                alert("Configurez d'abord votre nom et votre KAP!");
-                window.location.href = '/setup';
-                return;
+            // Only run user validation if app is running
+            if (currentAppStatus === true) {
+                if (!userId) {
+                    alert("Configurez d'abord votre nom et votre Équipe!");
+                    window.location.href = '/setup';
+                    return;
+                }
+                
+                fetchUserInfo();
+                initEventListeners();
+                checkExistingCooldown();
             }
-            
-            fetchUserInfo();
-            initEventListeners();
-            checkExistingCooldown();
         });
     </script>
     
@@ -696,5 +833,29 @@
     </a>
 
     <script src="/static/pwa.js"></script>
+    {% endif %}
+
+    <script>
+        // Auto-refresh functionality for app status
+        let currentAppStatus = {{ app_running|lower }};
+        
+        async function checkAppStatus() {
+            try {
+                const response = await fetch('/api/app/status');
+                const data = await response.json();
+                
+                if (data.running !== currentAppStatus) {
+                    // Status changed, reload the page
+                    // The server-side validation will handle user checking
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error('Error checking app status:', error);
+            }
+        }
+        
+        // Check app status every 5 seconds
+        setInterval(checkAppStatus, 5000);
+    </script>
 </body>
 </html>
