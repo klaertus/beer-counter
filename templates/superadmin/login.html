@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
-{% block title %}Admin Login — {{ ds.name }}{% endblock %}
+{% block title %}Super Admin Login{% endblock %}
 
 {% block body %}
 <div class="vh-100 d-flex align-items-center justify-content-center">
     <div class="card p-4" style="max-width: 400px; width: 100%;">
         <div class="mb-3">
-            <i class="fas fa-shield-halved text-amber fa-2x"></i>
+            <i class="fas fa-crown text-amber fa-2x"></i>
         </div>
-        <h4 class="fw-bold mb-1">{{ ds.name }}</h4>
-        <p class="text-muted small mb-4">Session admin login &nbsp;·&nbsp; <span class="session-code">{{ ds.code }}</span></p>
+        <h4 class="fw-bold mb-1">Super Admin</h4>
+        <p class="text-muted small mb-4">Global infrastructure access</p>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% for category, msg in messages %}
@@ -17,17 +17,22 @@
         {% endwith %}
 
         <form method="post">
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Username</label>
+                <input type="text" name="username" class="form-control"
+                       placeholder="admin" required autofocus>
+            </div>
             <div class="mb-4">
                 <label class="form-label fw-semibold">Password</label>
                 <input type="password" name="password" class="form-control"
-                       placeholder="••••••••" required autofocus>
+                       placeholder="••••••••" required>
             </div>
             <button type="submit" class="btn btn-amber w-100">
                 <i class="fas fa-right-to-bracket me-2"></i>Log in
             </button>
         </form>
-        <a href="{{ url_for('admin.admin_index') }}" class="btn btn-link text-muted mt-2 w-100">
-            <i class="fas fa-arrow-left me-1"></i>Different session
+        <a href="{{ url_for('public.home') }}" class="btn btn-link text-muted mt-2 w-100">
+            <i class="fas fa-arrow-left me-1"></i>Back to home
         </a>
     </div>
 </div>

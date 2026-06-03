@@ -1,0 +1,137 @@
+{% extends 'superadmin/base.html' %}
+{% block title %}Sessions{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <h4 class="fw-bold mb-0"><i class="fas fa-layer-group text-amber me-2"></i>Sessions</h4>
+    <button class="btn btn-amber btn-sm" data-bs-toggle="modal" data-bs-target="#createSessionModal">
+        <i class="fas fa-plus me-1"></i>New session
+    </button>
+</div>
+
+<div class="card mb-4">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Session</th>
+                    <th>Code</th>
+                    <th>Status</th>
+                    <th>Users</th>
+                    <th class="text-amber">Beers</th>
+                    <th>Created</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in sessions %}
+                <tr id="session-row-{{ s.id }}">
+                    <td class="fw-semibold">{{ s.name }}</td>
+                    <td><span class="session-code">{{ s.code }}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-link p-0 {% if s.is_open %}status-open{% else %}status-closed{% endif %}"
+                                onclick="toggleSession({{ s.id }}, this)">
+                            <i class="fas fa-{% if s.is_open %}circle{% else %}lock{% endif %} fa-sm me-1"></i>
+                            <span>{{ 'Open' if s.is_open else 'Closed' }}</span>
+                        </button>
+                    </td>
+                    <td>{{ s.user_count }}</td>
+                    <td class="text-amber fw-bold">{{ s.beer_count }}</td>
+                    <td class="text-muted small">{{ s.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td class="text-end d-flex gap-1 justify-content-end">
+                        <a href="{{ url_for('admin.dashboard', code=s.code) }}"
+                           class="btn btn-sm btn-outline-secondary" target="_blank" title="Open admin">
+                            <i class="fas fa-arrow-up-right-from-square"></i>
+                        </a>
+                        <button class="btn btn-sm btn-outline-danger"
+                                onclick="deleteSession({{ s.id }}, '{{ s.name }}')"
+                                title="Delete session">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-muted text-center py-4">No sessions yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{# ── Create session modal ─────────────────────────────────────────────── #}
+<div class="modal fade" id="createSessionModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus text-amber me-2"></i>New Session</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{{ url_for('superadmin.create_session') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Session Name</label>
+                        <input type="text" name="name" class="form-control"
+                               placeholder="e.g. New Year's Party 2026" maxlength="100" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Admin Password</label>
+                        <input type="password" name="admin_password" class="form-control"
+                               placeholder="Password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Chart Title</label>
+                        <input type="text" name="chart_title" class="form-control"
+                               placeholder="e.g. Compteur de Bieres"
+                               value="{{ chart_title_default }}" maxlength="140">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Drink Label</label>
+                        <input type="text" name="drink_label" class="form-control"
+                               placeholder="e.g. Bieres" value="{{ drink_label_default }}" maxlength="60">
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="vomitEnabled" name="vomit_enabled"
+                               {% if vomit_enabled_default %}checked{% endif %}>
+                        <label class="form-check-label fw-semibold" for="vomitEnabled">
+                            Enable vomit counter
+                        </label>
+                    </div>
+                    <div class="alert alert-info py-2">
+                        <i class="fas fa-info-circle me-1"></i>
+                        A unique 6-character code will be generated automatically.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-amber">Create Session</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+function toggleSession(id, btn) {
+    fetch(`/superadmin/api/sessions/${id}/toggle`, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            const isOpen = data.is_open;
+            btn.className = `btn btn-sm btn-link p-0 ${isOpen ? 'status-open' : 'status-closed'}`;
+            btn.innerHTML = `<i class="fas fa-${isOpen ? 'circle' : 'lock'} fa-sm me-1"></i><span>${isOpen ? 'Open' : 'Closed'}</span>`;
+        });
+}
+
+function deleteSession(id, name) {
+    if (!confirm(`Permanently delete session "${name}" and ALL its data?\nThis cannot be undone.`)) return;
+    fetch(`/superadmin/api/sessions/${id}`, { method: 'DELETE' })
+        .then(r => {
+            if (r.ok) {
+                const row = document.getElementById(`session-row-${id}`);
+                if (row) row.remove();
+            }
+        });
+}
+</script>
+{% endblock %}
+{% endblock %}

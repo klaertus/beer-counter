@@ -1,550 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Management - Admin Panel</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --bg-dark: #1e1e1e;
-            --container-bg: #2c2c2c;
-            --component-bg: #3a3a3a;
-            --primary-color: #5c6bc0;
-            --primary-hover: #3f51b5;
-            --secondary-color: #9575cd;
-            --success-color: #4caf50;
-            --warning-color: #ff9800;
-            --danger-color: #f44336;
-            --text-light: #ffffff;
-            --text-muted: #a0a0a0;
-            --border-radius-lg: 16px;
-            --border-radius-md: 12px;
-        }
+{% extends 'admin/base.html' %}
+{% block title %}Photos{% endblock %}
 
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        }
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <h4 class="fw-bold mb-0"><i class="fas fa-camera text-amber me-2"></i>Photos</h4>
+    <span class="text-muted small">{{ photo_drinks | length }} photos</span>
+</div>
 
-        .navbar {
-            background: linear-gradient(135deg, var(--container-bg), #333333) !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-            padding: 1rem 0;
-        }
-
-        .navbar-brand {
-            color: var(--primary-color) !important;
-            font-weight: 700;
-            font-size: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .navbar-brand:hover {
-            color: var(--primary-hover) !important;
-            transform: translateY(-1px);
-        }
-
-        .navbar-nav .nav-link {
-            color: var(--text-light) !important;
-            transition: all 0.3s ease;
-            padding: 0.5rem 1rem !important;
-            margin: 0 0.25rem;
-            border-radius: var(--border-radius-sm);
-            font-weight: 500;
-        }
-
-        .navbar-nav .nav-link:hover {
-            color: var(--primary-color) !important;
-            background-color: rgba(92, 107, 192, 0.1);
-            transform: translateY(-1px);
-        }
-
-        .navbar-nav .nav-link.active {
-            color: var(--primary-color) !important;
-            background-color: rgba(92, 107, 192, 0.2);
-            font-weight: 600;
-        }
-
-        .container-fluid {
-            padding: 2rem;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: var(--text-light);
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 0.5rem;
-        }
-
-        .photo-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-
-        .photo-card {
-            background-color: var(--component-bg);
-            border-radius: var(--border-radius-md);
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .photo-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-        }
-
-        .photo-container {
-            position: relative;
-            width: 100%;
-            height: 200px;
-            overflow: hidden;
-        }
-
-        .photo-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-
-        .photo-card:hover .photo-image {
-            transform: scale(1.05);
-        }
-
-        .photo-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.7));
-            display: flex;
-            align-items: flex-end;
-            padding: 1rem;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .photo-card:hover .photo-overlay {
-            opacity: 1;
-        }
-
-        .photo-info {
-            padding: 1.5rem;
-        }
-
-        .photo-user {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .user-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .user-name {
-            font-weight: 600;
-            color: var(--text-light);
-        }
-
-        .user-team {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .photo-meta {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .meta-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.9rem;
-        }
-
-        .meta-label {
-            color: var(--text-muted);
-        }
-
-        .meta-value {
-            color: var(--text-light);
-        }
-
-        .photo-actions {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: flex-end;
-        }
-
-        .btn-danger-admin {
-            background: linear-gradient(135deg, var(--danger-color), #d32f2f);
-            border: none;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: var(--border-radius-md);
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 0.9rem;
-        }
-
-        .btn-danger-admin:hover {
-            background: linear-gradient(135deg, #d32f2f, #c62828);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
-            color: white;
-            text-decoration: none;
-        }
-
-        .btn-info-admin {
-            background: linear-gradient(135deg, #2196f3, #1976d2);
-            border: none;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: var(--border-radius-md);
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 0.9rem;
-        }
-
-        .btn-info-admin:hover {
-            background: linear-gradient(135deg, #1976d2, #1565c0);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
-            color: white;
-            text-decoration: none;
-        }
-
-        .alert {
-            border-radius: var(--border-radius-md);
-            border: none;
-        }
-
-        .alert-success {
-            background-color: var(--success-color);
-            color: white;
-        }
-
-        .alert-danger {
-            background-color: var(--danger-color);
-            color: white;
-        }
-
-        .alert-info {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .stats-cards {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .stats-cards .stat-card {
-            min-width: 200px;
-        }
-
-        .stat-card {
-            background-color: var(--component-bg);
-            border-radius: var(--border-radius-md);
-            padding: 1rem;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .stat-number {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-            color: var(--primary-color);
-        }
-
-        .stat-label {
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .no-photos {
-            text-align: center;
-            padding: 4rem 1rem;
-            color: var(--text-muted);
-        }
-
-        .no-photos i {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            color: var(--text-muted);
-        }
-
-        .filename {
-            font-family: monospace;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            word-break: break-all;
-        }
-
-        .modal-content {
-            background-color: var(--container-bg);
-            color: var(--text-light);
-            border-radius: var(--border-radius-md);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-header {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-footer {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .btn-close {
-            filter: invert(1) brightness(200%);
-        }
-
-        .photo-preview {
-            width: 100%;
-            max-height: 400px;
-            object-fit: contain;
-            border-radius: var(--border-radius-md);
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('admin_dashboard') }}">
-                <i class="fas fa-shield-alt me-2"></i>
-                Beer Counter Admin
+{% if not photo_drinks %}
+<div class="card p-4 text-center text-muted">
+    <i class="fas fa-camera fa-3x mb-3 d-block" style="opacity:0.3;"></i>
+    No selfies taken yet.
+</div>
+{% else %}
+<div class="row g-3">
+    {% for d in photo_drinks %}
+    {% set u = users_map.get(d.user_id) %}
+    <div class="col-sm-6 col-md-4 col-lg-3" id="photo-{{ d.id }}">
+        <div class="card overflow-hidden">
+            <a href="{{ url_for('admin.serve_photo', code=ds.code, filename=d.photo) }}" target="_blank">
+                <img src="{{ url_for('admin.serve_thumbnail', code=ds.code, filename=d.photo) }}"
+                     class="w-100" style="height: 160px; object-fit: cover;"
+                     onerror="this.src='{{ url_for('admin.serve_photo', code=ds.code, filename=d.photo) }}'">
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
-                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin_users') }}">
-                            <i class="fas fa-users me-1"></i>Users
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin_teams') }}">
-                            <i class="fas fa-users-cog me-1"></i>Teams
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{{ url_for('admin_photos') }}">
-                            <i class="fas fa-images me-1"></i>Photos
-                        </a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">
-                            <i class="fas fa-home me-1"></i>Main App
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin_logout') }}">
-                            <i class="fas fa-sign-out-alt me-1"></i>Logout
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container-fluid">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'error' else category }}" role="alert">
-                        {{ message }}
+            <div class="p-2">
+                <div class="d-flex align-items-center gap-2">
+                    {% if u %}
+                    <div class="user-avatar" style="background:{{ u.color }}; width:24px; height:24px; font-size:0.7rem;">
+                        {{ u.username[0].upper() }}
                     </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <h2 class="section-title">Photo Management</h2>
-
-        <div class="stats-cards">
-            <div class="stat-card">
-                <div class="stat-number">{{ photos|length }}</div>
-                <div class="stat-label">Total Photos</div>
-            </div>
-        </div>
-
-        {% if photos %}
-        <div class="photo-grid">
-            {% for photo in photos %}
-            <div class="photo-card">
-                <div class="photo-container">
-                    <img src="{{ photo.thumbnail_path }}" 
-                         alt="Photo by {{ photo.username }}" 
-                         class="photo-image" 
-                         loading="lazy"
-                         onerror="if(!this.hasAttribute('data-fallback-tried')) { this.setAttribute('data-fallback-tried', 'true'); this.src='{{ photo.file_path }}'; this.style.objectFit='cover'; } else { this.style.display='none'; this.nextElementSibling.style.display='flex'; }">
-                    <div class="photo-error" style="display: none; align-items: center; justify-content: center; background: var(--component-bg); color: var(--text-color); height: 200px; border-radius: 8px;">
-                        <div class="text-center">
-                            <i class="fas fa-image-slash fa-2x mb-2"></i>
-                            <div>Image not found</div>
-                            <small class="text-muted">{{ photo.filename }}</small>
-                        </div>
-                    </div>
-                    <div class="photo-overlay">
-                        <button class="btn btn-sm btn-light" onclick="viewPhoto('{{ photo.filename }}', '{{ photo.file_path }}', '{{ photo.username }}', '{{ photo.timestamp }}')">
-                            <i class="fas fa-eye"></i> View
-                        </button>
-                    </div>
-                </div>
-                </div>
-                
-                <div class="photo-info">
-                    <div class="photo-user">
-                        <div class="user-color" style="background-color: {{ photo.user_color }}"></div>
-                        <div>
-                            <div class="user-name">{{ photo.username }}</div>
-                            <div class="user-team">{{ photo.user_team }}</div>
-                        </div>
-                    </div>
-
-                    <div class="photo-meta">
-                        <div class="meta-item">
-                            <span class="meta-label">Uploaded:</span>
-                            <span class="meta-value">{{ photo.timestamp }}</span>
-                        </div>
-                        <div class="meta-item">
-                            <span class="meta-label">Size:</span>
-                            <span class="meta-value">{{ "%.1f"|format((photo.file_size / 1024)) }} KB</span>
-                        </div>
-                        <div class="meta-item">
-                            <span class="meta-label">File:</span>
-                            <span class="filename">{{ photo.filename }}</span>
-                        </div>
-                    </div>
-
-                    <div class="photo-actions">
-                        <button class="btn-info-admin" onclick="viewPhoto('{{ photo.filename }}', '{{ photo.file_path }}', '{{ photo.username }}', '{{ photo.timestamp }}')" data-bs-toggle="modal" data-bs-target="#photoModal">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn-danger-admin" onclick="deletePhoto('{{ photo.filename }}', '{{ photo.username }}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div class="no-photos">
-            <i class="fas fa-images"></i>
-            <h3>No Photos Found</h3>
-            <p>No photos have been uploaded yet.</p>
-        </div>
-        {% endif %}
-    </div>
-
-    <!-- Photo View Modal -->
-    <div class="modal fade" id="photoModal" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="photoModalTitle">Photo Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <img id="photoPreview" src="" alt="Photo preview" class="photo-preview mb-3">
-                    <div id="photoDetails"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn-danger-admin" id="deletePhotoBtn">
-                        <i class="fas fa-trash me-2"></i>Delete Photo
+                    <span class="small fw-semibold flex-grow-1">{{ u.username }}</span>
+                    {% else %}
+                    <span class="small text-muted flex-grow-1">Unknown</span>
+                    {% endif %}
+                    <button class="btn btn-sm btn-outline-danger p-0 px-1"
+                            onclick="deletePhoto('{{ d.photo }}', {{ d.id }})"
+                            title="Delete photo">
+                        <i class="fas fa-trash" style="font-size:0.7rem;"></i>
                     </button>
                 </div>
+                <div class="text-muted mt-1" style="font-size:0.7rem;">
+                    {{ d.timestamp.strftime('%Y-%m-%d %H:%M') }}
+                </div>
             </div>
         </div>
     </div>
+    {% endfor %}
+</div>
+{% endif %}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script>
-        let currentPhoto = null;
-        const photoModal = new bootstrap.Modal(document.getElementById('photoModal'));
+{% block scripts %}
+<script>
+const CODE = '{{ ds.code }}';
 
-        function viewPhoto(filename, filepath, username, timestamp) {
-            currentPhoto = filename;
-            document.getElementById('photoModalTitle').textContent = `Photo by ${username}`;
-            document.getElementById('photoPreview').src = filepath;
-            document.getElementById('photoDetails').innerHTML = `
-                <div class="row">
-                    <div class="col-md-6">
-                        <strong>Uploaded by:</strong> ${username}
-                    </div>
-                    <div class="col-md-6">
-                        <strong>Upload time:</strong> ${timestamp}
-                    </div>
-                    <div class="col-12 mt-2">
-                        <strong>Filename:</strong> <code>${filename}</code>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('deletePhotoBtn').onclick = () => {
-                deletePhoto(filename, username);
-            };
-        }
-
-        async function deletePhoto(filename, username) {
-            if (confirm(`Are you sure you want to delete this photo by ${username}?`)) {
-                try {
-                    const response = await axios.delete(`/admin/api/photos/${encodeURIComponent(filename)}`);
-
-                    if (response.status === 200) {
-                        photoModal.hide();
-                        location.reload();
-                    }
-                } catch (error) {
-                    alert('Error deleting photo: ' + (error.response?.data?.error || error.message));
-                }
+function deletePhoto(filename, drinkId) {
+    if (!confirm('Delete this photo?')) return;
+    fetch(`/admin/${CODE}/api/photos/${encodeURIComponent(filename)}`, { method: 'DELETE' })
+        .then(r => {
+            if (r.ok) {
+                const el = document.getElementById(`photo-${drinkId}`);
+                if (el) el.remove();
             }
-        }
-    </script>
-</body>
-</html>
+        });
+}
+</script>
+{% endblock %}
+{% endblock %}

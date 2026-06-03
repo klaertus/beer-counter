@@ -1,0 +1,529 @@
+{% extends 'base.html' %}
+{% block title %}{{ user.username }} — {{ ds.name }}{% endblock %}
+
+{% block head %}
+<meta http-equiv="Cache-Control" content="no-store">
+{% endblock %}
+
+{% block body %}
+<div class="d-flex flex-column counter-shell" style="min-height: 100vh; background: var(--bg-base);">
+
+    {# ── Top bar ──────────────────────────────────────────────────────── #}
+    <header class="counter-header d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+            <div class="user-avatar" style="background: {{ user.color }};">
+                {{ user.username[0].upper() }}
+            </div>
+            <div>
+                <div class="fw-semibold lh-1">{{ user.username }}</div>
+                {% if user.team %}
+                <div class="text-muted small d-flex align-items-center gap-1 mt-1">
+                    <span class="team-dot" style="background: {{ user.team.color }};"></span>
+                    {{ user.team.name }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            {% if not ds.is_open %}
+            <span class="badge text-bg-danger"><i class="fas fa-lock me-1"></i>Closed</span>
+            {% endif %}
+        </div>
+    </header>
+
+    {# ── Main counter area ────────────────────────────────────────────── #}
+    <main class="counter-main flex-grow-1 d-flex flex-column justify-content-between py-4">
+
+        <section class="stats-section">
+            <div class="section-title">{{ labels.counter_stats or 'Mes stats' }}</div>
+            <div class="stats-grid">
+                <div class="stat-tile stat-beer">
+                    <div class="stat-label"><i class="fa-solid fa-beer-mug-empty me-2"></i>{{ drink_label }}</div>
+                    <div class="stat-value" id="beerCount">{{ beer_count }}</div>
+                </div>
+                {% if ds.vomit_enabled %}
+                <div class="stat-tile stat-vomit">
+                    <div class="stat-label"><i class="fas fa-ghost me-2"></i>{{ labels.counter_vomit or 'Vomit' }}</div>
+                    <div class="stat-value" id="vomitCount">{{ vomit_count }}</div>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if user.team %}
+            <div class="section-title mt-4">{{ labels.counter_team or 'Mon Kap' }}</div>
+            <div class="team-card">
+                <span class="team-dot team-dot-lg" style="background: {{ user.team.color }};"></span>
+                <div class="team-name">{{ user.team.name }}</div>
+            </div>
+            {% endif %}
+        </section>
+
+        <section class="action-section">
+            <div id="sessionClosedBanner" class="session-closed-banner {% if ds.is_open %}d-none{% endif %}">
+                <i class="fas fa-circle-exclamation me-2"></i>
+                {{ labels.session_over or 'Session terminee' }}
+            </div>
+
+            <div id="actionOpen" class="d-flex flex-column align-items-center gap-3 {% if not ds.is_open %}d-none{% endif %}">
+                <div id="rateLimitAlert" class="alert alert-warning text-center d-none"
+                     style="max-width: 280px;">
+                    <i class="fas fa-clock me-1"></i>
+                    Slow down! Wait <strong id="cooldownTimer">0</strong>s
+                </div>
+
+                <button class="drink-btn" id="drinkBtn" onclick="onDrinkClick()">
+                    <i class="fa-solid fa-beer-mug-empty"></i>
+                </button>
+                <div class="text-muted small">{{ labels.counter_tap or 'appuie pour boire' }}</div>
+
+                {% if ds.vomit_enabled %}
+                <button class="vomit-btn" id="vomitBtn" onclick="recordVomit()">
+                    <i class="fas fa-ghost me-1"></i>{{ labels.counter_vomit or 'Vomit' }}
+                </button>
+                {% endif %}
+            </div>
+
+            <div id="actionClosed" class="text-center text-muted mt-2 {% if ds.is_open %}d-none{% endif %}">
+                <i class="fas fa-lock display-4 mb-2 d-block"></i>
+                This session is closed — no new drinks can be recorded.
+            </div>
+        </section>
+    </main>
+
+    {# ── Footer ────────────────────────────────────────────────────────── #}
+    <footer class="text-center pb-5 d-flex justify-content-center gap-3">
+        <a href="{{ url_for('public.setup', code=ds.code) }}"
+           class="btn btn-link text-muted btn-sm">
+            <i class="fas fa-user-pen me-1"></i>{{ labels.counter_change_profile or 'Change profile' }}
+        </a>
+        {% if ds.is_open %}
+        <button class="btn btn-link text-muted btn-sm" onclick="openStandalonePhoto()">
+            <i class="fas fa-camera me-1"></i>{{ labels.counter_add_photo or 'Add photo' }}
+        </button>
+        {% endif %}
+    </footer>
+</div>
+
+{# ── Photo choice modal ────────────────────────────────────────────── #}
+<div class="modal fade" id="photoChoiceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-camera me-2 text-amber"></i>{{ labels.photo_title or 'Ajouter une photo' }} ?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-muted">
+                La photo sera enregistree dans votre appareil.
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button class="btn btn-outline-secondary" onclick="chooseDrinkNoPhoto()">Non</button>
+                <button class="btn btn-amber" onclick="chooseDrinkWithPhoto()">Oui</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Drink confirmation modal (camera = confirmation) ─────────────────── #}
+<div class="modal fade" id="drinkModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-beer-mug-empty me-2 text-amber"></i>Confirmer
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        onclick="cancelDrink()"></button>
+            </div>
+            <div class="modal-body text-center">
+                <video id="cameraFeed" class="w-100 rounded d-none" autoplay playsinline
+                       style="max-height: 300px; object-fit: cover;"></video>
+                <img id="photoPreview" class="w-100 rounded d-none" alt="Preview"
+                     style="max-height: 300px; object-fit: cover;">
+                <canvas id="photoCanvas" class="d-none"></canvas>
+                <input id="drinkCameraInput" type="file" accept="image/*" capture="user" class="d-none">
+                <div id="cameraLoading" class="py-4 text-muted">
+                    <i class="fas fa-spinner fa-spin fa-2x mb-2 d-block"></i>
+                    {{ labels.photo_loading or 'Demarrage de la camera...' }}
+                </div>
+            </div>
+            <div class="modal-footer flex-column gap-2 border-0 pt-0">
+                <button id="captureBtn" class="btn btn-amber w-100 d-none" onclick="capturePhoto('drink')">
+                    <i class="fas fa-camera me-2"></i>{{ labels.photo_take or 'Prendre une photo' }}
+                </button>
+                <button class="btn btn-link text-muted w-100 small" data-bs-dismiss="modal" onclick="cancelDrink()">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Standalone photo modal ────────────────────────────────────────────── #}
+<div class="modal fade" id="standalonePhotoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-camera me-2 text-amber"></i>{{ labels.photo_title or 'Ajouter une photo' }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        onclick="cancelStandalonePhoto()"></button>
+            </div>
+            <div class="modal-body text-center">
+                <video id="spCameraFeed" class="w-100 rounded d-none" autoplay playsinline
+                       style="max-height: 300px; object-fit: cover;"></video>
+                <img id="spPhotoPreview" class="w-100 rounded d-none" alt="Preview"
+                     style="max-height: 300px; object-fit: cover;">
+                <canvas id="spPhotoCanvas" class="d-none"></canvas>
+                <input id="spCameraInput" type="file" accept="image/*" capture="user" class="d-none">
+                <div id="spCameraLoading" class="py-4 text-muted">
+                    <i class="fas fa-spinner fa-spin fa-2x mb-2 d-block"></i>
+                    {{ labels.photo_loading or 'Demarrage de la camera...' }}
+                </div>
+            </div>
+            <div class="modal-footer flex-column gap-2 border-0 pt-0">
+                <button id="spCaptureBtn" class="btn btn-amber w-100 d-none" onclick="capturePhoto('standalone')">
+                    <i class="fas fa-camera me-2"></i>{{ labels.photo_take or 'Prendre une photo' }}
+                </button>
+                <button id="spRetakeBtn" class="btn btn-outline-secondary w-100 d-none" onclick="retakePhoto('standalone')">
+                    <i class="fas fa-rotate-left me-2"></i>{{ labels.photo_retake or 'Reprendre' }}
+                </button>
+                <button id="spConfirmBtn" class="btn btn-success w-100 d-none" onclick="confirmStandalonePhoto()">
+                    <i class="fas fa-check me-2"></i>{{ labels.photo_save or 'Enregistrer la photo' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+const SESSION_CODE = '{{ ds.code }}';
+const VOMIT_ENABLED = {{ 'true' if ds.vomit_enabled else 'false' }};
+let drinkModal, standaloneModal;
+let photoChoiceModal;
+let stream = null, spStream = null;
+let drinkPhotoBlob = null, spPhotoBlob = null;
+let cooldownInterval;
+const useFileCapture = shouldUseFileCapture();
+let sessionOpen = {{ 'true' if ds.is_open else 'false' }};
+
+document.addEventListener('DOMContentLoaded', () => {
+    drinkModal      = new bootstrap.Modal(document.getElementById('drinkModal'));
+    standaloneModal = new bootstrap.Modal(document.getElementById('standalonePhotoModal'));
+    photoChoiceModal = new bootstrap.Modal(document.getElementById('photoChoiceModal'));
+});
+
+// ─── Drink flow ───────────────────────────────────────────────────────────
+
+function onDrinkClick() {
+    const canCamera = useFileCapture || (navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    if (!canCamera) {
+        recordDrink(null);
+        return;
+    }
+    photoChoiceModal.show();
+}
+
+function cancelDrink()    { stopCamera('drink'); }
+function chooseDrinkNoPhoto() { photoChoiceModal.hide(); recordDrink(null); }
+function chooseDrinkWithPhoto() { photoChoiceModal.hide(); drinkModal.show(); startCamera('drink'); }
+
+function recordDrink(photoData) {
+    if (!sessionOpen) {
+        setSessionOpen(false);
+        return;
+    }
+    const btn = document.getElementById('drinkBtn');
+    if (btn) btn.disabled = true;
+
+    const formData = new FormData();
+    if (photoData) formData.append('photo', photoData, 'selfie.jpg');
+
+    fetch(`/s/${SESSION_CODE}/api/drink`, { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error === 'Rate limited') {
+                startCooldown(data.cooldown);
+            } else if (data.error === 'Session is closed') {
+                setSessionOpen(false);
+            } else if (data.success) {
+                document.getElementById('beerCount').textContent = data.beer_count;
+                animatePop(document.getElementById('beerCount'));
+                if (btn) btn.disabled = false;
+            } else {
+                alert(data.error || 'Something went wrong.');
+                if (btn) btn.disabled = false;
+            }
+        })
+        .catch(() => {
+            alert('Network error — drink not recorded.');
+            if (btn) btn.disabled = false;
+        });
+}
+
+// ─── Vomit ────────────────────────────────────────────────────────────────
+
+function recordVomit() {
+    if (!VOMIT_ENABLED) return;
+    if (!sessionOpen) {
+        setSessionOpen(false);
+        return;
+    }
+    const btn = document.getElementById('vomitBtn');
+    if (btn) btn.disabled = true;
+    fetch(`/s/${SESSION_CODE}/api/vomit`, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const el = document.getElementById('vomitCount');
+                if (el && typeof data.vomit_count === 'number') {
+                    el.textContent = data.vomit_count;
+                }
+                animatePop(el);
+            } else if (data.error === 'Session is closed') {
+                setSessionOpen(false);
+            }
+        })
+        .finally(() => { if (btn) btn.disabled = false; });
+}
+
+// ─── Standalone photo ─────────────────────────────────────────────────────
+
+function openStandalonePhoto() {
+    standaloneModal.show();
+    startCamera('standalone');
+}
+
+function cancelStandalonePhoto() { stopCamera('standalone'); }
+
+function confirmStandalonePhoto() {
+    standaloneModal.hide();
+    const formData = new FormData();
+    formData.append('photo', spPhotoBlob, 'photo.jpg');
+    fetch(`/s/${SESSION_CODE}/api/photo`, { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(data => { if (!data.success) alert(data.error || 'Upload failed.'); });
+}
+
+// ─── Rate limit cooldown ──────────────────────────────────────────────────
+
+function animatePop(el) {
+    if (!el) return;
+    el.classList.add('pop');
+    setTimeout(() => el.classList.remove('pop'), 200);
+}
+
+function startCooldown(seconds) {
+    document.getElementById('rateLimitAlert').classList.remove('d-none');
+    const btn   = document.getElementById('drinkBtn');
+    const timer = document.getElementById('cooldownTimer');
+    if (btn) btn.disabled = true;
+
+    let remaining = seconds;
+    timer.textContent = remaining;
+    clearInterval(cooldownInterval);
+    cooldownInterval = setInterval(() => {
+        remaining--;
+        timer.textContent = remaining;
+        if (remaining <= 0) {
+            clearInterval(cooldownInterval);
+            document.getElementById('rateLimitAlert').classList.add('d-none');
+            if (btn) btn.disabled = false;
+        }
+    }, 1000);
+}
+
+// ─── Camera helpers ───────────────────────────────────────────────────────
+// mode = 'drink' | 'standalone'
+
+function _ids(mode) {
+    if (mode === 'drink') return {
+        feed: 'cameraFeed', preview: 'photoPreview', canvas: 'photoCanvas',
+        loading: 'cameraLoading', capture: 'captureBtn', retake: 'retakeBtn', confirm: 'confirmBtn'
+    };
+    return {
+        feed: 'spCameraFeed', preview: 'spPhotoPreview', canvas: 'spPhotoCanvas',
+        loading: 'spCameraLoading', capture: 'spCaptureBtn', retake: 'spRetakeBtn', confirm: 'spConfirmBtn'
+    };
+}
+
+function startCamera(mode) {
+    const ids = _ids(mode);
+    ['feed','preview'].forEach(k => document.getElementById(ids[k]).classList.add('d-none'));
+    ['capture','retake','confirm'].forEach(k => {
+        const el = document.getElementById(ids[k]);
+        if (el) el.classList.add('d-none');
+    });
+    document.getElementById(ids.loading).classList.remove('d-none');
+    if (mode === 'drink') drinkPhotoBlob = null; else spPhotoBlob = null;
+
+    if (useFileCapture) {
+        prepareFileCapture(mode);
+        triggerFileCapture(mode);
+        return;
+    }
+    navigator.mediaDevices.getUserMedia({
+        video: {
+            facingMode: { ideal: 'user' },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+        }
+    })
+        .then(s => {
+            if (mode === 'drink') stream = s; else spStream = s;
+            const feed = document.getElementById(ids.feed);
+            feed.srcObject = s;
+            feed.onloadedmetadata = () => {
+                document.getElementById(ids.loading).classList.add('d-none');
+                feed.classList.remove('d-none');
+                document.getElementById(ids.capture).classList.remove('d-none');
+            };
+        })
+        .catch(() => {
+            stopCamera(mode);
+            if (mode === 'drink') { drinkModal.hide(); recordDrink(null); }
+            else standaloneModal.hide();
+        });
+}
+
+function capturePhoto(mode) {
+    if (useFileCapture) {
+        triggerFileCapture(mode);
+        return;
+    }
+    const ids    = _ids(mode);
+    const video  = document.getElementById(ids.feed);
+    const canvas = document.getElementById(ids.canvas);
+    canvas.width  = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    stopCamera(mode);
+
+    canvas.toBlob(blob => {
+        if (mode === 'drink') {
+            drinkModal.hide();
+            recordDrink(blob);
+            return;
+        }
+        spPhotoBlob = blob;
+        const img = document.getElementById(ids.preview);
+        img.src = URL.createObjectURL(blob);
+        img.classList.remove('d-none');
+        document.getElementById(ids.capture).classList.add('d-none');
+        document.getElementById(ids.retake).classList.remove('d-none');
+        document.getElementById(ids.confirm).classList.remove('d-none');
+    }, 'image/jpeg', 0.85);
+}
+
+function retakePhoto(mode) {
+    const ids = _ids(mode);
+    document.getElementById(ids.preview).classList.add('d-none');
+    document.getElementById(ids.retake).classList.add('d-none');
+    document.getElementById(ids.confirm).classList.add('d-none');
+    startCamera(mode);
+}
+
+function stopCamera(mode) {
+    if (useFileCapture) {
+        resetCameraUI(mode);
+        return;
+    }
+    const s = mode === 'drink' ? stream : spStream;
+    if (s) s.getTracks().forEach(t => t.stop());
+    if (mode === 'drink') stream = null; else spStream = null;
+    const feedId = mode === 'drink' ? 'cameraFeed' : 'spCameraFeed';
+    document.getElementById(feedId).srcObject = null;
+}
+
+function shouldUseFileCapture() {
+    const coarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    const uaMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    return coarsePointer || uaMobile;
+}
+
+function getFileInput(mode) {
+    return document.getElementById(mode === 'drink' ? 'drinkCameraInput' : 'spCameraInput');
+}
+
+function prepareFileCapture(mode) {
+    const ids = _ids(mode);
+    document.getElementById(ids.loading).classList.add('d-none');
+    document.getElementById(ids.capture).classList.remove('d-none');
+}
+
+function triggerFileCapture(mode) {
+    const input = getFileInput(mode);
+    input.value = '';
+    input.onchange = () => handleFileCapture(mode, input.files && input.files[0]);
+    input.click();
+}
+
+function handleFileCapture(mode, file) {
+    if (!file) return;
+    const ids = _ids(mode);
+    if (mode === 'drink') {
+        drinkModal.hide();
+        recordDrink(file);
+        return;
+    }
+    spPhotoBlob = file;
+    const img = document.getElementById(ids.preview);
+    img.src = URL.createObjectURL(file);
+    img.classList.remove('d-none');
+    document.getElementById(ids.capture).classList.add('d-none');
+    document.getElementById(ids.retake).classList.remove('d-none');
+    document.getElementById(ids.confirm).classList.remove('d-none');
+}
+
+function resetCameraUI(mode) {
+    const ids = _ids(mode);
+    ['feed', 'preview'].forEach(k => document.getElementById(ids[k]).classList.add('d-none'));
+    ['capture', 'retake', 'confirm'].forEach(k => {
+        const el = document.getElementById(ids[k]);
+        if (el) el.classList.add('d-none');
+    });
+    document.getElementById(ids.loading).classList.add('d-none');
+    const img = document.getElementById(ids.preview);
+    img.src = '';
+}
+
+function setSessionOpen(isOpen) {
+    sessionOpen = isOpen;
+    const banner = document.getElementById('sessionClosedBanner');
+    const openBlock = document.getElementById('actionOpen');
+    const closedBlock = document.getElementById('actionClosed');
+    if (isOpen) {
+        if (banner) banner.classList.add('d-none');
+        if (openBlock) openBlock.classList.remove('d-none');
+        if (closedBlock) closedBlock.classList.add('d-none');
+    } else {
+        if (banner) banner.classList.remove('d-none');
+        if (openBlock) openBlock.classList.add('d-none');
+        if (closedBlock) closedBlock.classList.remove('d-none');
+        stopCamera('drink');
+        stopCamera('standalone');
+    }
+}
+
+function pollStatus() {
+    fetch(`/s/${SESSION_CODE}/api/status`)
+        .then(r => r.json())
+        .then(data => {
+            if (typeof data.is_open === 'boolean' && data.is_open !== sessionOpen) {
+                setSessionOpen(data.is_open);
+            }
+        })
+        .catch(() => {});
+}
+
+document.getElementById('drinkModal').addEventListener('hidden.bs.modal', () => stopCamera('drink'));
+document.getElementById('standalonePhotoModal').addEventListener('hidden.bs.modal', () => stopCamera('standalone'));
+
+setSessionOpen(sessionOpen);
+setInterval(pollStatus, 10000);
+</script>
+{% endblock %}
+{% endblock %}

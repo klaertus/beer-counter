@@ -1,606 +1,85 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drink Management - Admin Panel</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --bg-dark: #1e1e1e;
-            --container-bg: #2c2c2c;
-            --component-bg: #3a3a3a;
-            --primary-color: #5c6bc0;
-            --primary-hover: #3f51b5;
-            --secondary-color: #9575cd;
-            --success-color: #4caf50;
-            --warning-color: #ff9800;
-            --danger-color: #f44336;
-            --text-light: #ffffff;
-            --text-muted: #a0a0a0;
-            --border-radius-lg: 16px;
-            --border-radius-md: 12px;
-        }
+{% extends 'admin/base.html' %}
+{% block title %}Drinks{% endblock %}
 
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        }
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <h4 class="fw-bold mb-0"><i class="fas fa-beer-mug-empty text-amber me-2"></i>Drink Log</h4>
+    <span class="text-muted small">{{ drinks | length }} records</span>
+</div>
 
-        .navbar {
-            background-color: var(--container-bg) !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .navbar-brand {
-            color: var(--primary-color) !important;
-            font-weight: 700;
-        }
-
-        .navbar-nav .nav-link {
-            color: var(--text-light) !important;
-            transition: color 0.3s ease;
-        }
-
-        .navbar-nav .nav-link:hover {
-            color: var(--primary-color) !important;
-        }
-
-        .container-fluid {
-            padding: 2rem;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: var(--text-light);
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 0.5rem;
-        }
-
-        .user-info-card {
-            background-color: var(--component-bg);
-            border-radius: var(--border-radius-md);
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .table-dark {
-            background-color: var(--component-bg);
-            border-radius: var(--border-radius-md);
-            overflow: hidden;
-        }
-
-        .table-dark th {
-            background-color: var(--container-bg);
-            border-color: rgba(255, 255, 255, 0.1);
-            color: var(--text-light);
-        }
-
-        .table-dark td {
-            border-color: rgba(255, 255, 255, 0.1);
-            color: var(--text-light);
-            vertical-align: middle;
-        }
-
-        .color-preview {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            vertical-align: middle;
-        }
-
-        .btn-admin {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-            border: none;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: var(--border-radius-md);
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 0.9rem;
-        }
-
-        .btn-admin:hover {
-            background: linear-gradient(135deg, var(--primary-hover), #303f9f);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(92, 107, 192, 0.4);
-            color: white;
-            text-decoration: none;
-        }
-
-        .btn-success-admin {
-            background: linear-gradient(135deg, var(--success-color), #388e3c);
-            border: none;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: var(--border-radius-md);
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 0.9rem;
-        }
-
-        .btn-success-admin:hover {
-            background: linear-gradient(135deg, #388e3c, #2e7d32);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
-            color: white;
-            text-decoration: none;
-        }
-
-        .btn-danger-admin {
-            background: linear-gradient(135deg, var(--danger-color), #d32f2f);
-            border: none;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: var(--border-radius-md);
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 0.9rem;
-        }
-
-        .btn-danger-admin:hover {
-            background: linear-gradient(135deg, #d32f2f, #c62828);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
-            color: white;
-            text-decoration: none;
-        }
-
-        .modal-content {
-            background-color: var(--container-bg);
-            color: var(--text-light);
-            border-radius: var(--border-radius-md);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-header {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-footer {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .form-control, .form-select {
-            background-color: var(--component-bg);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-light);
-            border-radius: var(--border-radius-md);
-        }
-
-        .form-control:focus, .form-select:focus {
-            background-color: var(--component-bg);
-            border-color: var(--primary-color);
-            color: var(--text-light);
-            box-shadow: 0 0 0 0.2rem rgba(92, 107, 192, 0.25);
-        }
-
-        .form-control::placeholder {
-            color: var(--text-muted);
-        }
-
-        .btn-close {
-            filter: invert(1) brightness(200%);
-        }
-
-        .alert {
-            border-radius: var(--border-radius-md);
-            border: none;
-        }
-
-        .alert-success {
-            background-color: var(--success-color);
-            color: white;
-        }
-
-        .alert-danger {
-            background-color: var(--danger-color);
-            color: white;
-        }
-
-        .alert-info {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .drink-type-badge {
-            font-size: 0.8rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 20px;
-        }
-
-        .beer-badge {
-            background-color: var(--success-color);
-            color: white;
-        }
-
-        .vomit-badge {
-            background-color: var(--warning-color);
-            color: white;
-        }
-
-        .user-stats {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .stat-number {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        .no-drinks {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: var(--text-muted);
-        }
-
-        .no-drinks i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('admin_dashboard') }}">
-                <i class="fas fa-shield-alt me-2"></i>
-                Beer Counter Admin
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
-                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin_users') }}">
-                            <i class="fas fa-users me-1"></i>Users
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin_teams') }}">
-                            <i class="fas fa-users-cog me-1"></i>Teams
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin_photos') }}">
-                            <i class="fas fa-images me-1"></i>Photos
-                        </a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">
-                            <i class="fas fa-home me-1"></i>Main App
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin_logout') }}">
-                            <i class="fas fa-sign-out-alt me-1"></i>Logout
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container-fluid">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'error' else category }}" role="alert">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="section-title mb-0">
-                <a href="{{ url_for('admin_users') }}" class="text-decoration-none text-muted me-2">
-                    <i class="fas fa-arrow-left"></i>
-                </a>
-                Drink Management
-            </h2>
-        </div>
-
-        {% if user_info %}
-        <div class="user-info-card">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <div class="d-flex align-items-center gap-3 mb-2">
-                        <span class="color-preview" style="background-color: {{ user_info.color }}"></span>
-                        <h3 class="mb-0">{{ user_info.username }}</h3>
-                    </div>
-                    <div class="d-flex align-items-center gap-2 text-muted">
-                        <span class="color-preview" style="background-color: {{ user_info.team_color }}"></span>
-                        <span>{{ user_info.team }}</span>
-                        <span class="mx-2">•</span>
-                        <span>ID: {{ user_info.id[:8] }}...</span>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="user-stats">
-                        <div class="stat-item">
-                            <i class="fas fa-beer text-success"></i>
-                            <div>
-                                <div class="stat-number text-success">{{ user_info.drink_count }}</div>
-                                <small class="text-muted">Beers</small>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Type</th>
+                    <th>Time</th>
+                    <th>Photo</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in drinks %}
+                {% set u = users_map.get(d.user_id) %}
+                <tr id="row-{{ d.id }}">
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            {% if u %}
+                            <div class="user-avatar" style="background:{{ u.color }}; width:28px; height:28px; font-size:0.75rem;">
+                                {{ u.username[0].upper() }}
                             </div>
-                        </div>
-                        <div class="stat-item">
-                            <i class="fas fa-ghost text-warning"></i>
-                            <div>
-                                <div class="stat-number text-warning">{{ user_info.vomit_count }}</div>
-                                <small class="text-muted">Vomits</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3>Drink History</h3>
-            <div class="action-buttons">
-                <button class="btn-success-admin" data-bs-toggle="modal" data-bs-target="#addDrinkModal">
-                    <i class="fas fa-plus me-2"></i>Add Beer
-                </button>
-                <button class="btn btn-outline-warning" onclick="addVomit()">
-                    <i class="fas fa-ghost me-2"></i>Add Vomit
-                </button>
-            </div>
-        </div>
-
-        {% if drinks %}
-        <div class="table-responsive">
-            <table class="table table-dark table-hover">
-                <thead>
-                    <tr>
-                        <th>Type</th>
-                        <th>Timestamp</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for drink in drinks %}
-                    <tr>
-                        <td>
-                            {% if drink.count == 1 %}
-                                <span class="drink-type-badge beer-badge">
-                                    <i class="fas fa-beer me-1"></i>Beer
-                                </span>
+                            <span>{{ u.username }}</span>
                             {% else %}
-                                <span class="drink-type-badge vomit-badge">
-                                    <i class="fas fa-ghost me-1"></i>Vomit
-                                </span>
+                            <span class="text-muted">Deleted user</span>
                             {% endif %}
-                        </td>
-                        <td>
-                            <span class="fw-bold">{{ drink.timestamp }}</span>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn btn-sm btn-outline-info" onclick="editDrinkTime('{{ drink.timestamp }}')" data-bs-toggle="modal" data-bs-target="#editTimeModal">
-                                    <i class="fas fa-clock"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="deleteDrink('{{ drink.timestamp }}')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="no-drinks">
-            <i class="fas fa-glass-whiskey text-muted"></i>
-            <h3>No Drinks Found</h3>
-            <p>This user hasn't recorded any drinks yet.</p>
-            <button class="btn-admin" data-bs-toggle="modal" data-bs-target="#addDrinkModal">
-                <i class="fas fa-plus me-2"></i>Add First Drink
-            </button>
-        </div>
-        {% endif %}
-
-        {% else %}
-        <div class="alert alert-danger" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            User not found!
-        </div>
-        {% endif %}
-    </div>
-
-    <!-- Add Drink Modal -->
-    <div class="modal fade" id="addDrinkModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Drink</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="addDrinkForm">
-                        <div class="mb-3">
-                            <label for="addDrinkType" class="form-label">Drink Type</label>
-                            <select class="form-select" id="addDrinkType">
-                                <option value="beer">🍺 Beer</option>
-                                <option value="vomit">🤮 Vomit</option>
-                            </select>
                         </div>
-                        <div class="mb-3">
-                            <label for="addDrinkTime" class="form-label">Timestamp</label>
-                            <input type="datetime-local" class="form-control" id="addDrinkTime" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn-admin" onclick="addDrink()">Add Drink</button>
-                </div>
-            </div>
-        </div>
+                    </td>
+                    <td>
+                        <span class="badge {% if d.kind == 'beer' %}text-bg-warning{% else %}text-bg-danger{% endif %}">
+                            {{ d.kind }}
+                        </span>
+                    </td>
+                    <td class="text-muted small">{{ d.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td>
+                        {% if d.photo %}
+                        <a href="{{ url_for('admin.serve_photo', code=ds.code, filename=d.photo) }}"
+                           target="_blank" class="text-muted">
+                            <i class="fas fa-image"></i>
+                        </a>
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-danger"
+                                onclick="deleteDrink({{ d.id }})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="text-muted text-center py-4">No drink records yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+</div>
 
-    <!-- Edit Time Modal -->
-    <div class="modal fade" id="editTimeModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Drink Time</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="editTimeForm">
-                        <input type="hidden" id="editOriginalTime">
-                        <div class="mb-3">
-                            <label for="editNewTime" class="form-label">New Timestamp</label>
-                            <input type="datetime-local" class="form-control" id="editNewTime" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn-admin" onclick="updateDrinkTime()">Update Time</button>
-                </div>
-            </div>
-        </div>
-    </div>
+{% block scripts %}
+<script>
+const CODE = '{{ ds.code }}';
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script>
-        const userId = '{{ user_id }}';
-
-        // Set current time as default
-        document.addEventListener('DOMContentLoaded', function() {
-            const now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            document.getElementById('addDrinkTime').value = now.toISOString().slice(0, 16);
+function deleteDrink(id) {
+    if (!confirm('Delete this drink record?')) return;
+    fetch(`/admin/${CODE}/api/drinks/${id}`, { method: 'DELETE' })
+        .then(r => {
+            if (r.ok) {
+                const row = document.getElementById(`row-${id}`);
+                if (row) row.remove();
+            }
         });
-
-        async function addDrink() {
-            const drinkType = document.getElementById('addDrinkType').value;
-            const timestamp = document.getElementById('addDrinkTime').value;
-
-            if (!timestamp) {
-                alert('Please select a timestamp');
-                return;
-            }
-
-            try {
-                const response = await axios.post('/admin/api/drinks', {
-                    user_id: userId,
-                    type: drinkType,
-                    timestamp: timestamp.replace('T', ' ') + ':00'
-                });
-
-                if (response.status === 201) {
-                    location.reload();
-                }
-            } catch (error) {
-                alert('Error adding drink: ' + (error.response?.data?.error || error.message));
-            }
-        }
-
-        async function addVomit() {
-            const now = new Date();
-            const timestamp = now.toISOString().slice(0, 19).replace('T', ' ');
-
-            try {
-                const response = await axios.post('/admin/api/drinks', {
-                    user_id: userId,
-                    type: 'vomit',
-                    timestamp: timestamp
-                });
-
-                if (response.status === 201) {
-                    location.reload();
-                }
-            } catch (error) {
-                alert('Error adding vomit: ' + (error.response?.data?.error || error.message));
-            }
-        }
-
-        function editDrinkTime(originalTime) {
-            document.getElementById('editOriginalTime').value = originalTime;
-            
-            // Convert timestamp to datetime-local format
-            const date = new Date(originalTime);
-            date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-            document.getElementById('editNewTime').value = date.toISOString().slice(0, 16);
-        }
-
-        async function updateDrinkTime() {
-            const originalTime = document.getElementById('editOriginalTime').value;
-            const newTime = document.getElementById('editNewTime').value;
-
-            if (!newTime) {
-                alert('Please select a new timestamp');
-                return;
-            }
-
-            try {
-                const response = await axios.put(`/admin/api/drinks/${userId}/${encodeURIComponent(originalTime)}`, {
-                    timestamp: newTime.replace('T', ' ') + ':00'
-                });
-
-                if (response.status === 200) {
-                    location.reload();
-                }
-            } catch (error) {
-                alert('Error updating drink time: ' + (error.response?.data?.error || error.message));
-            }
-        }
-
-        async function deleteDrink(timestamp) {
-            if (confirm('Are you sure you want to delete this drink entry?')) {
-                try {
-                    const response = await axios.delete(`/admin/api/drinks/${userId}/${encodeURIComponent(timestamp)}`);
-
-                    if (response.status === 200) {
-                        location.reload();
-                    }
-                } catch (error) {
-                    alert('Error deleting drink: ' + (error.response?.data?.error || error.message));
-                }
-            }
-        }
-    </script>
-</body>
-</html>
+}
+</script>
+{% endblock %}
+{% endblock %}

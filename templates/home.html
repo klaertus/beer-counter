@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Beer Counter{% endblock %}
+
+{% block body %}
+<div class="vh-100 d-flex align-items-center justify-content-center">
+    <div class="text-center px-4" style="max-width: 400px; width: 100%;">
+
+        <i class="fa-solid fa-beer-mug-empty display-1 text-amber mb-3"></i>
+        <h1 class="fw-black mb-1" style="font-size: 2.5rem;">Beer Counter</h1>
+        <p class="text-muted mb-4">Enter your session code to join</p>
+
+        {% if error %}
+        <div class="alert alert-danger py-2 mb-3">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="{{ url_for('public.join') }}">
+            <div class="input-group input-group-lg mb-3">
+                <input
+                    type="text" name="code"
+                    class="form-control text-center fw-bold"
+                    placeholder="BEER26"
+                    maxlength="10"
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="characters"
+                    spellcheck="false"
+                    style="letter-spacing: 0.25em; font-size: 1.4rem;"
+                    required autofocus>
+                <button class="btn btn-amber px-4" type="submit">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-5 d-flex flex-column gap-2 align-items-center">
+            <a href="{{ url_for('admin.admin_index') }}" class="text-muted small">
+                <i class="fas fa-shield-halved me-1"></i>Session Admin Login
+            </a>
+            <a href="{{ url_for('superadmin.login') }}" class="text-muted small">
+                <i class="fas fa-crown me-1"></i>Super Admin
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'admin/base.html' %}
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<h4 class="fw-bold mb-4"><i class="fas fa-gear text-amber me-2"></i>Session Settings</h4>
+
+<div class="row g-4" style="max-width: 700px;">
+
+    {# ── Session info ─────────────────────────────────────────────────── #}
+    <div class="col-12">
+        <div class="card p-3">
+            <h6 class="fw-semibold mb-3 text-muted">Session Info</h6>
+            <div class="d-flex align-items-center gap-3 mb-2">
+                <span class="text-muted small" style="width:80px;">Code</span>
+                <span class="session-code">{{ ds.code }}</span>
+                <button class="btn btn-sm btn-outline-secondary ms-1"
+                        onclick="navigator.clipboard.writeText('{{ ds.code }}').then(() => this.innerHTML='<i class=\'fas fa-check\'></i>')">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-muted small" style="width:80px;">Status</span>
+                <span class="{% if ds.is_open %}status-open{% else %}status-closed{% endif %} fw-semibold">
+                    {{ 'Open' if ds.is_open else 'Closed' }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    {# ── Rename session ────────────────────────────────────────────────── #}
+    <div class="col-12">
+        <div class="card p-3">
+            <h6 class="fw-semibold mb-3 text-muted">Rename Session</h6>
+            <form method="post">
+                <input type="hidden" name="action" value="rename">
+                <div class="d-flex gap-2">
+                    <input type="text" name="name" class="form-control"
+                           value="{{ ds.name }}" maxlength="100" required>
+                    <button type="submit" class="btn btn-amber">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# ── Open / close session ──────────────────────────────────────────── #}
+    <div class="col-12">
+        <div class="card p-3">
+            <h6 class="fw-semibold mb-1 text-muted">Session Status</h6>
+            <p class="text-muted small mb-3">
+                Closing the session prevents new drinks from being recorded.
+                Existing data is preserved.
+            </p>
+            <form method="post">
+                <input type="hidden" name="action" value="toggle">
+                <button type="submit"
+                        class="btn {% if ds.is_open %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                    <i class="fas fa-{% if ds.is_open %}lock{% else %}lock-open{% endif %} me-2"></i>
+                    {% if ds.is_open %}Close session{% else %}Open session{% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {# ── Change admin password ─────────────────────────────────────────── #}
+    <div class="col-12">
+        <div class="card p-3">
+            <h6 class="fw-semibold mb-3 text-muted">Change Admin Password</h6>
+            <form method="post">
+                <input type="hidden" name="action" value="change_password">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Current password</label>
+                    <input type="password" name="current_password" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">New password</label>
+                    <input type="password" name="new_password" class="form-control"
+                           minlength="6" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Confirm new password</label>
+                    <input type="password" name="confirm_password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-amber">Update password</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
